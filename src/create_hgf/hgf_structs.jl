@@ -90,7 +90,7 @@ end
 
 """
 """
-Base.@kwdef mutable struct HGF
+Base.@kwdef mutable struct HGF <: ActionModels.AbstractSubmodel
     all_nodes::Dict{String,AbstractNode}
     input_nodes::Dict{String,AbstractInputNode}
     state_nodes::Dict{String,AbstractStateNode}
