@@ -5,6 +5,6 @@ function ActionModels.initialize_attributes(
 ) where {TF,TI}
 
     #For now, we don't initialize any attributes
-    return deepcopy(submodel)
+    return submodel
 
 end
