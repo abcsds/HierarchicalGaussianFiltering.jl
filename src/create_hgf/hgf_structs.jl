@@ -33,6 +33,16 @@ abstract type HGFUpdateType end
 struct ClassicUpdate <: HGFUpdateType end
 struct EnhancedUpdate <: HGFUpdateType end
 
+
+##############################################
+######## Type for grouping parameters ########
+##############################################
+Base.@kwdef mutable struct ParameterGroup
+    name::String
+    parameters::Vector
+    value::Real
+end
+
 ################################
 ######## Coupling types ########
 ################################
