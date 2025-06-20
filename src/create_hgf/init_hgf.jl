@@ -90,6 +90,10 @@ function init_hgf(;
     input_nodes_inputted_order = Vector{String}()
     state_nodes_inputted_order = Vector{String}()
 
+    #Dictionaries for storing the interface between symbol param/state names and the positions in the node
+    parameter_interface = Dict{Symbol, Tuple}()
+    state_interface = Dict{Symbol, Tuple}()
+
     #For each specified input node
     for node_info in nodes
         #For each field in the node info
@@ -121,6 +125,15 @@ function init_hgf(;
             #Store its name in the inputted order
             push!(state_nodes_inputted_order, node_info.name)
         end
+
+        #Add joined names for parameters and states to the ActionModels interface
+        for param_name in String.(fieldnames(typeof(node.parameters)))
+            parameter_interface[Symbol(join((node.name, param_name), "_"))] = (node.name, param_name)
+        end
+        for state_name in String.(fieldnames(typeof(node.states)))
+            state_interface[Symbol(join((node.name, state_name), "_"))] = (node.name, state_name)
+        end
+
     end
 
     ### Set up edges ###

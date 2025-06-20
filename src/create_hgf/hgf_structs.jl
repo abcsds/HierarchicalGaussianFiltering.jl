@@ -98,6 +98,8 @@ Base.@kwdef mutable struct HGF
     parameter_groups::Dict = Dict()
     save_history::Bool = true
     timesteps::Vector{Real} = [0]
+    parameter_interface::Dict{Symbol,Tuple} = Dict{Symbol,Tuple}()
+    state_interface::Dict{Symbol,Tuple} = Dict{Symbol,Tuple}()
 end
 
 ##################################

@@ -40,6 +40,9 @@ include("ActionModels_extensions/initialize_attributes.jl")
 include("ActionModels_extensions/manipulate_attributes.jl")
 include("ActionModels_extensions/plot_trajectory.jl")
 include("ActionModels_extensions/simulation.jl")
+include("ActionModels_extensions/manipulate_hgf/set_parameters.jl")
+include("ActionModels_extensions/manipulate_hgf/get_parameters.jl")
+include("ActionModels_extensions/manipulate_hgf/get_states.jl")
 
 #Functions for updating the HGF
 include("update_hgf/update_hgf.jl")
