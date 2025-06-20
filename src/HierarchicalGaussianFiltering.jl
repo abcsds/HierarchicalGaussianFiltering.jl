@@ -35,16 +35,11 @@ end
 #Types for HGFs
 include("create_hgf/hgf_structs.jl")
 
-#Overloading ActionModels functions
-include("ActionModels_variations/create_premade_agent.jl")
-include("ActionModels_variations/plot_trajectory.jl")
-include("ActionModels_variations/get_history.jl")
-include("ActionModels_variations/get_parameters.jl")
-include("ActionModels_variations/get_states.jl")
-include("ActionModels_variations/give_inputs.jl")
-include("ActionModels_variations/reset.jl")
-include("ActionModels_variations/set_parameters.jl")
-include("ActionModels_variations/set_save_history.jl")
+#Extending ActionModels functions
+include("ActionModels_extensions/initialize_attributes.jl")
+include("ActionModels_extensions/manipulate_attributes.jl")
+include("ActionModels_extensions/plot_trajectory.jl")
+include("ActionModels_extensions/simulation.jl")
 
 #Functions for updating the HGF
 include("update_hgf/update_hgf.jl")
