@@ -37,6 +37,7 @@ include("ActionModels_extensions/manipulate_hgf/reset.jl")
 
 #Functions for updating the HGF
 include("update_hgf/update_hgf.jl")
+include("update_hgf/multiple_inputs.jl")
 include("update_hgf/nonlinear_transforms.jl")
 include("update_hgf/node_updates/continuous_input_node.jl")
 include("update_hgf/node_updates/continuous_state_node.jl")
