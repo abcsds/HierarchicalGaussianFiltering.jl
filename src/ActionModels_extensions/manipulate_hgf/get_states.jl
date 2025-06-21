@@ -104,23 +104,23 @@ function ActionModels.get_states(hgf::HGF, node_name::String)
     node = get_states(hgf.all_nodes[node_name])
 end
 
-function ActionModels.get_states(node::AbstractNode)
+# function ActionModels.get_states(node::AbstractNode)
 
-    #Get the node's name and states
-    node_name = node.name
-    node_states = node.states
+#     #Get the node's name and states
+#     node_name = node.name
+#     node_states = node.states
 
-    #Return a dictionary of the node's states
-    Dict((node_name,string(key))=>getfield(node_states, key) for key ∈ fieldnames(typeof(node_states)))
+#     #Return a dictionary of the node's states
+#     Dict((node_name,string(key))=>getfield(node_states, key) for key ∈ fieldnames(typeof(node_states)))
 
-end
+# end
 
-### For getting all states of an HGF ###
-function ActionModels.get_states(hgf::HGF)
+# ### For getting all states of an HGF ###
+# function ActionModels.get_states(hgf::HGF)
 
-    #Get the states of all nodes
-    merge(
-        [get_states(node) for node in hgf.ordered_nodes.all_nodes]...
-        )
+#     #Get the states of all nodes
+#     merge(
+#         [get_states(node) for node in hgf.ordered_nodes.all_nodes]...
+#         )
         
-end
+# end
