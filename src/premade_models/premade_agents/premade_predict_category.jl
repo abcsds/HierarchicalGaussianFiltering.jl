@@ -1,107 +1,56 @@
+export HGFPredictCategory
 
-
-###### Categorical Prediction Action ######
-"""
-    update_hgf_predict_category(agent::Agent, input)
-
-Action model that first updates the HGF, and then returns a categorical prediction of the input. The HGF used must be a categorical HGF.
-
-In addition to the HGF substruct, the following must be present in the agent:
-Settings: "target_categorical_node"
-"""
-function update_hgf_predict_category(agent::Agent, input)
-
-    #Update the HGF
-    update_hgf!(agent.substruct, input)
-
-    #Run the action model
-    action_distribution = hgf_predict_category(agent, input)
-
-    return action_distribution
+Base.@kwdef struct HGFPredictCategory <: AbstractPremadeModel
+    action_noise::Float64 = 1.0
+    target_node::Symbol = "xcat"
+    HGF::Union{HGF,String} = "categorical_3level"
 end
 
-"""
-    hgf_predict_category(agent::Agent, input)
+function ActionModel(config::HGFPredictCategory)
 
-Action model which gives a categorical prediction of the input, based on an HGF. The HGF used must be a categorical HGF.
-
-In addition to the HGF substruct, the following must be present in the agent:
-Settings: "target_categorical_node"
-"""
-function hgf_predict_category(agent::Agent, input)
-
-    #Get out settings and parameters
-    target_node = agent.settings["target_categorical_node"]
-
-    #Get out the HGF
-    hgf = agent.substruct
-
-    #Get the specified state
-    predicted_category_probabilities = get_states(hgf, (target_node, "prediction"))
-
-    #Create Bernoulli normal distribution with mean of the target value and a standard deviation from parameters
-    distribution = Distributions.Categorical(predicted_category_probabilities)
-
-    #Return the action distribution
-    return distribution
-end
-
-
-
-
-
-"""
-    premade_hgf_predict_category(config::Dict)
-
-Create an agent suitable for the HGF predict category model.
-
-# Config defaults:
- - "HGF": "categorical_3level"
- - "target_categorical_node": "xcat"
-"""
-function premade_hgf_predict_category(config::Dict)
-
-    ## Combine defaults and user settings
-
-    #Default parameters and settings
-    defaults = Dict("target_categorical_node" => "xcat", "HGF" => "categorical_3level")
-
-    #If there is no HGF in the user-set parameters
-    if !("HGF" in keys(config))
-        HGF_name = defaults["HGF"]
-        #Make a default HGF
-        config["HGF"] = premade_hgf(HGF_name)
-        #And warn them
-        @warn "an HGF was not set by the user. Using the default: a $HGF_name HGF with default settings"
+    #Extract hgf
+    if config.HGF isa String
+        #If the HGF is a string, we assume it is a name of a premade HGF
+        hgf = premade_hgf(config.HGF)
+    else
+        hgf = config.HGF
     end
 
-    #Warn the user about used defaults and misspecified keys
-    warn_premade_defaults(defaults, config)
+    #Extract target state
+    target_state = join((config.target_state, "prediction"), "_")
 
-    #Merge to overwrite defaults
-    config = merge(defaults, config)
+    #Create action model function
+    am_function = function hgf_gaussian(attributes::ModelAttributes, hgf_observation::Int64)
 
+        #Extract HGF
+        hgf = attributes.submodel
 
-    ## Create agent 
-    #Set the action model
-    action_model = update_hgf_predict_category
+        #Extract the inverse temperature
+        β = 1/load_parameters(attributes).action_noise
 
-    #Set the HGF
-    hgf = config["HGF"]
+        #Update the HGF
+        update_hgf!(hgf, hgf_observation)
 
-    #Set parameters
-    parameters = Dict()
-    #Set states
-    states = Dict()
-    #Set settings
-    settings = Dict("target_categorical_node" => config["target_categorical_node"])
+        #Extract specified belief state
+        probabilities = get_states(hgf, target_state)
 
-    #Create the agent
-    return init_agent(
-        action_model,
-        substruct = hgf,
+        #Softmax transform with the inverse noise as precision
+        probabilities = softmax(probabilties * β)
+
+        return Categorical(probabilities)
+    end
+
+    parameters = (; action_noise = Parameter(config.action_noise))
+
+    observations = (; hgf_observation = Observation(discrete = true))
+
+    actions = (; report = Action(Categorical),)
+
+    return ActionModel(
+        am_function,
         parameters = parameters,
-        states = states,
-        settings = settings,
+        observations = observations,
+        actions = actions,
     )
+
 end

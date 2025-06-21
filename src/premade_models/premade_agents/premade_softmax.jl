@@ -1,106 +1,69 @@
-"""
-    hgf_binary_softmax_action(agent, input)
+export HGFSoftmax
 
-Action model which gives a binary action. The action probability is the softmax of a specified state of a node.
-
-In addition to the HGF substruct, the following must be present in the agent:
-Parameters: "softmax_action_precision"
-Settings: "target_state"
-"""
-function hgf_binary_softmax_action(agent::Agent, input)
-
-    #Get out HGF, settings and parameters
-    hgf = agent.substruct
-    target_state = agent.settings["target_state"]
-    action_noise = agent.parameters["action_noise"]
-
-    #Update the HGF
-    update_hgf!(hgf, input)
-
-    #Get the specified state
-    target_value = get_states(hgf, target_state)
-
-    #Use sotmax to get the action probability 
-    action_probability = 1 / (1 + exp(action_noise * target_value))
-
-    #If the action probability is not between 0 and 1
-    if !(0 <= action_probability <= 1)
-        #Throw an error that will reject samples when fitted
-        throw(
-            RejectParameters(
-                "With these parameters and inputs, the action probability became $action_probability, which should be between 0 and 1. Try other parameter settings",
-            ),
-        )
-    end
-
-    #Create Bernoulli normal distribution with mean of the target value and a standard deviation from parameters
-    distribution = Distributions.Bernoulli(action_probability)
-
-    #Return the action distribution
-    return distribution
+Base.@kwdef struct HGFSoftmax <: AbstractPremadeModel
+    action_noise::Float64 = 1.0
+    target_state::Symbol = "x_posterior_mean"
+    HGF::Union{HGF,String} = "continuous_2level"
 end
 
+function ActionModel(config::HGFSoftmax)
 
+    #Extract hgf
+    if config.HGF isa String
+        #If the HGF is a string, we assume it is a name of a premade HGF
+        hgf = premade_hgf(config.HGF)
+    else
+        hgf = config.HGF
+    end
+    #Extract target state
+    target_state = config.target_state
 
+    #Create action model function
+    am_function = function hgf_gaussian(
+        attributes::ModelAttributes,
+        hgf_observation::R,
+    ) where {R<:Real}
 
+        #Extract HGF
+        hgf = attributes.submodel
 
-"""
-    premade_hgf_binary_softmax(config::Dict)
+        #Extract inverse temperature
+        β = 1/load_parameters(attributes).action_noise
 
-Create an agent suitable for the HGF binary softmax model.
+        #Update the HGF
+        update_hgf!(hgf, hgf_observation)
 
-# Config defaults:
- - "HGF": "binary_3level"
- - "softmax_action_precision": 1
- - "target_state": ("xbin", "prediction_mean")
-"""
-function premade_hgf_binary_softmax(config::Dict)
+        #Extract specified belief state
+        value = get_states(hgf, target_state)
 
-    ## Combine defaults and user settings
+        #Calculate the sigmoid action probability
+        action_probability = logistic(value * β)
 
-    #Default parameters and settings
-    defaults = Dict(
-        "action_noise" => 1,
-        "target_state" => ("xbin", "prediction_mean"),
-        "HGF" => "binary_3level",
-    )
+        #If the probability mean becomes a NaN
+        if isnan(action_probability)
+            #Throw an error that will reject samples when fitted
+            throw(
+                RejectParameters(
+                    "With these parameters and inputs, the mean of the gaussian action became $μ, which is invalid. Try other parameter settings",
+                ),
+            )
+        end
 
-    #If there is no HGF in the user-set parameters
-    if !("HGF" in keys(config))
-        HGF_name = defaults["HGF"]
-        #Make a default HGF
-        config["HGF"] = premade_hgf(HGF_name)
-        #And warn them
-        @warn "an HGF was not set by the user. Using the default: a $HGF_name HGF with default settings"
+        #Create normal distribution with mean of the target value and a standard deviation from parameters
+        return Bernoulli(action_probability)
     end
 
-    #Warn the user about used defaults and misspecified keys
-    warn_premade_defaults(defaults, config)
+    parameters = (action_noise = Parameter(config.action_noise),)
 
-    #Merge to overwrite defaults
-    config = merge(defaults, config)
+    observations = (; hgf_observation = Observation(Real))
 
+    actions = (; report = Action(Bernoulli),)
 
-    ## Create agent 
-    #Set the action model
-    action_model = hgf_binary_softmax_action
-
-    #Set the HGF
-    hgf = config["HGF"]
-
-    #Set parameters
-    parameters = Dict("action_noise" => config["action_noise"])
-    #Set states
-    states = Dict()
-    #Set settings
-    settings = Dict("target_state" => config["target_state"])
-
-    #Create the agent
-    return init_agent(
-        action_model,
-        substruct = hgf,
+    return ActionModel(
+        am_function,
         parameters = parameters,
-        states = states,
-        settings = settings,
+        observations = observations,
+        actions = actions,
     )
+
 end

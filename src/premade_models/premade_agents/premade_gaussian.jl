@@ -24,9 +24,10 @@ function ActionModel(config::HGFGaussian)
         hgf_observation::R,
     ) where {R<:Real}
 
-        #Extract HGF, settings and parameters
+        #Extract HGF
         hgf = attributes.submodel
 
+        #Extract action noise
         β = load_parameters(attributes).action_noise
 
         #Update the HGF
