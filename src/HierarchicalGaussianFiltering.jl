@@ -6,7 +6,7 @@ using Reexport
 using RecipesBase
 
 #Export functions
-export init_node, init_hgf, premade_hgf, check_hgf, update_hgf!
+export init_node, init_hgf, premade_hgf, check_hgf, update_hgf!, multiple_inputs!
 export get_prediction, get_surprise
 export ParameterGroup
 export EnhancedUpdate, ClassicUpdate
@@ -33,6 +33,7 @@ include("ActionModels_extensions/simulation.jl")
 include("ActionModels_extensions/manipulate_hgf/set_parameters.jl")
 include("ActionModels_extensions/manipulate_hgf/get_parameters.jl")
 include("ActionModels_extensions/manipulate_hgf/get_states.jl")
+include("ActionModels_extensions/manipulate_hgf/reset.jl")
 
 #Functions for updating the HGF
 include("update_hgf/update_hgf.jl")
