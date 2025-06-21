@@ -3,8 +3,8 @@
 function ActionModels.get_parameters(hgf::HGF)
     return NamedTuple(
         map(
-            Tuple(keys(hgf.parameter_interface)),
             param_name -> param_name => get_parameters(hgf, param_name),
+            Tuple(keys(hgf.parameter_interface)),
         ),
     )
 
@@ -13,8 +13,8 @@ end
 function ActionModels.get_states(hgf::HGF)
     return NamedTuple(
         map(
-            Tuple(keys(hgf.state_interface)),
             state_name -> state_name => get_states(hgf, state_name),
+            Tuple(keys(hgf.state_interface)),
         ),
     )
 end
