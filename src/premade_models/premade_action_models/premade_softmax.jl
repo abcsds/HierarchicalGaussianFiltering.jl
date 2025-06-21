@@ -6,7 +6,7 @@ Base.@kwdef struct HGFSoftmax <: ActionModels.AbstractPremadeModel
     HGF::Union{HGF,String} = "continuous_2level"
 end
 
-function ActionModel(config::HGFSoftmax)
+function  ActionModels.ActionModel(config::HGFSoftmax)
 
     #Extract hgf
     if config.HGF isa String

@@ -6,7 +6,7 @@ Base.@kwdef struct HGFPredictCategory <: ActionModels.AbstractPremadeModel
     HGF::Union{HGF,String} = "categorical_3level"
 end
 
-function ActionModel(config::HGFPredictCategory)
+function  ActionModels.ActionModel(config::HGFPredictCategory)
 
     #Extract hgf
     if config.HGF isa String

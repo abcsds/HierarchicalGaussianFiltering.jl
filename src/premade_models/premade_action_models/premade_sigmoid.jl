@@ -6,7 +6,7 @@ Base.@kwdef struct HGFSigmoid <: ActionModels.AbstractPremadeModel
     HGF::Union{HGF,String} = "continuous_2level"
 end
 
-function ActionModel(config::HGFSigmoid)
+function  ActionModels.ActionModel(config::HGFSigmoid)
 
     #Extract hgf
     if config.HGF isa String
