@@ -5,6 +5,8 @@ using Reexport
 @reexport using ActionModels
 using RecipesBase
 
+import ActionModels: Agent
+
 #Export functions
 export init_node, init_hgf, premade_hgf, check_hgf, update_hgf!, multiple_inputs!
 export get_prediction, get_surprise
