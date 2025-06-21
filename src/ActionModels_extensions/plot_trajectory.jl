@@ -1,8 +1,16 @@
-@recipe function f(
-    agent::Union{Agent{HGF}, HGF};
-    node::Union{String, Symbol},
-    state::Union{String, Symbol, Nothing} = nothing
-)
+@recipe function f(agent::Union{Agent{<:HGF},HGF}, node::String;)
+
+    #Check that the node and state are of the correct type
+    if !(node isa Union{Symbol,String})
+        throw(ArgumentError("The node must be a Symbol or String, got $(typeof(node))"))
+    end
+    if !(state isa Union{Symbol,String,Nothing})
+        throw(
+            ArgumentError(
+                "The state must be a Symbol, String or Nothing, got $(typeof(state))",
+            ),
+        )
+    end
 
     #Extract HGF
     if agent isa Agent{HGF}
@@ -20,31 +28,27 @@
     #Extract node
     selected_node = hgf.all_nodes[node]
 
-    #If no state has been specified, select the appropirate state for the node type
-    if isnothing(state)
-
-        #Plot posterior for continuous state nodes
-        if selected_node isa ContinuousStateNode
-            state = "posterior"
+    #Plot posterior for continuous state nodes
+    if selected_node isa ContinuousStateNode
+        state = "posterior"
 
         #Plot prediction for binary state nodes
-        elseif selected_node isa BinaryStateNode
-            state = "prediction"
+    elseif selected_node isa BinaryStateNode
+        state = "prediction"
 
         #Plot prediction for categorical state nodes
-        elseif selected_node isa CategoricalStateNode
-            state = "prediction"
+    elseif selected_node isa CategoricalStateNode
+        state = "prediction"
 
         #Plot the input value for input nodes
-        elseif selected_node isa AbstractInputNode
-            state = "input_value"
-        end
+    elseif selected_node isa AbstractInputNode
+        state = "input_value"
     end
 
     #Get x-axis; the number of timesteps
     timesteps = hgf.timesteps
 
-#If the entire distribution is to be plotted
+    #If the entire distribution is to be plotted
     if state in ["posterior", "prediction"] && !(selected_node isa CategoricalStateNode)
 
         #Get the history of the mean
