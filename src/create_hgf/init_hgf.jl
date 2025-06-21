@@ -144,6 +144,8 @@ function init_hgf(;
         state_nodes_dict,
         ordered_nodes,
         parameter_groups_dict,
+        parameter_interface,
+        state_interface,
         save_history,
         [0],
     )
