@@ -1,6 +1,6 @@
 export HGFPredictCategory
 
-Base.@kwdef struct HGFPredictCategory <: AbstractPremadeModel
+Base.@kwdef struct HGFPredictCategory <: ActionModels.AbstractPremadeModel
     action_noise::Float64 = 1.0
     target_node::Symbol = "xcat"
     HGF::Union{HGF,String} = "categorical_3level"

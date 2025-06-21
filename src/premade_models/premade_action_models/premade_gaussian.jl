@@ -1,6 +1,6 @@
 export HGFGaussian
 
-Base.@kwdef struct HGFGaussian <: AbstractPremadeModel
+Base.@kwdef struct HGFGaussian <: ActionModels.AbstractPremadeModel
     action_noise::Float64 = 1.0
     target_state::Symbol = "x_posterior_mean"
     HGF::Union{HGF,String} = "continuous_2level"

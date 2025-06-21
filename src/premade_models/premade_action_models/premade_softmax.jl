@@ -1,6 +1,6 @@
 export HGFSoftmax
 
-Base.@kwdef struct HGFSoftmax <: AbstractPremadeModel
+Base.@kwdef struct HGFSoftmax <: ActionModels.AbstractPremadeModel
     action_noise::Float64 = 1.0
     target_state::Symbol = "x_posterior_mean"
     HGF::Union{HGF,String} = "continuous_2level"

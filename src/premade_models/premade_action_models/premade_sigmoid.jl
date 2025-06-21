@@ -1,6 +1,6 @@
 export HGFSigmoid
 
-Base.@kwdef struct HGFSigmoid <: AbstractPremadeModel
+Base.@kwdef struct HGFSigmoid <: ActionModels.AbstractPremadeModel
     action_noise::Float64 = 1.0
     target_state::Symbol = "x_posterior_mean"
     HGF::Union{HGF,String} = "continuous_2level"
