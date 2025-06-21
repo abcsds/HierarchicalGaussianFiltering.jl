@@ -1,5 +1,3 @@
-
-
 function ActionModels.get_parameters(hgf::HGF)
     return NamedTuple(
         map(
@@ -23,7 +21,6 @@ end
 
 
 
-
 function ActionModels.get_parameters(hgf::HGF, parameter_name::Symbol)
     if parameter_name in keys(hgf.parameter_interface)
         return get_parameters(hgf, hgf.parameter_interface[parameter_name])
@@ -42,6 +39,8 @@ end
 
 
 
+
+
 function ActionModels.set_parameters!(
     hgf::HGF,
     parameter_name::Symbol,
@@ -53,7 +52,6 @@ function ActionModels.set_parameters!(
 
         #Set the parameter in the HGF
         set_parameters!(hgf, hgf.parameter_interface[parameter_name], parameter_value)
-
         return true
     else
         return AttributeError()
@@ -65,7 +63,6 @@ function ActionModels.set_states!(hgf::HGF, state_name::Symbol, state_value::T) 
     if state_name in keys(hgf.state_interface)
 
         set_states!(hgf, hgf.state_interface[state_name], state_value)
-
         return true
     else
         return AttributeError()
