@@ -24,6 +24,9 @@ export DriftCoupling,
     LinearTransform,
     NonlinearTransform
 
+
+const node_attribute_separator = "_"
+
 #Types for HGFs
 include("create_hgf/hgf_structs.jl")
 
