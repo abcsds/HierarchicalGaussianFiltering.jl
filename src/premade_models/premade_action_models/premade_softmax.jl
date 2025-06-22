@@ -2,7 +2,7 @@ export HGFSoftmax
 
 Base.@kwdef struct HGFSoftmax <: ActionModels.AbstractPremadeModel
     action_noise::Float64 = 1.0
-    target_state::Symbol = "x_posterior_mean"
+    target_state::Symbol = :x_posterior_mean
     HGF::Union{HGF,String} = "continuous_2level"
 end
 
@@ -64,6 +64,7 @@ function  ActionModels.ActionModel(config::HGFSoftmax)
         parameters = parameters,
         observations = observations,
         actions = actions,
+        submodel = hgf,
     )
 
 end

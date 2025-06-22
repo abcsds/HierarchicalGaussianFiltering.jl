@@ -2,7 +2,7 @@ export HGFPredictCategory
 
 Base.@kwdef struct HGFPredictCategory <: ActionModels.AbstractPremadeModel
     action_noise::Float64 = 1.0
-    target_node::Symbol = "xcat"
+    target_node::Symbol = :xcat
     HGF::Union{HGF,String} = "categorical_3level"
 end
 
@@ -17,7 +17,7 @@ function  ActionModels.ActionModel(config::HGFPredictCategory)
     end
 
     #Extract target state
-    target_state = join((config.target_state, "prediction"), "_")
+    target_state = Symbol(join((config.target_node, "prediction"), "_"))
 
     #Create action model function
     am_function = function hgf_gaussian(attributes::ModelAttributes, hgf_observation::Int64)
@@ -32,10 +32,10 @@ function  ActionModels.ActionModel(config::HGFPredictCategory)
         update_hgf!(hgf, hgf_observation)
 
         #Extract specified belief state
-        probabilities = get_states(hgf, target_state)
+        probabilities = get_states(hgf, target_state)[end] #TODO: figure out why the end here is needed
 
         #Softmax transform with the inverse noise as precision
-        probabilities = softmax(probabilties * β)
+        probabilities = softmax(probabilities .* β)
 
         return Categorical(probabilities)
     end
@@ -51,6 +51,7 @@ function  ActionModels.ActionModel(config::HGFPredictCategory)
         parameters = parameters,
         observations = observations,
         actions = actions,
+        submodel = hgf,
     )
 
 end
