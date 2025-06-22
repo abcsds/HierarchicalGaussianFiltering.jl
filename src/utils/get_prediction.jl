@@ -80,19 +80,21 @@ end
 
 function get_prediction(node::CategoricalStateNode, stepsize::Real = 1)
 
-    #Save old states
-    old_states = (; prediction = node.states.prediction)
+    # #Save old states
+    # old_states = (; prediction = node.states.prediction)
 
-    #Update prediction mean
-    node.states.prediction = calculate_prediction(node)
+    # #Update prediction mean
+    # node.states.prediction = calculate_prediction(node)
 
-    #Save new states
-    new_states = (; prediction = node.states.prediction)
+    # #Save new states
+    # new_states = (; prediction = node.states.prediction)
 
-    #Change states back to the old states
-    node.states.prediction = old_states.prediction
+    # #Change states back to the old states
+    # node.states.prediction = old_states.prediction
 
-    return new_states
+    # return new_states
+
+    return (; prediction = calculate_prediction(node))
 end
 
 
