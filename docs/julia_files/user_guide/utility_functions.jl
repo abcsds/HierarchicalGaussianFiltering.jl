@@ -93,7 +93,7 @@ set_parameters!(
 
 
 #give single input
-give_inputs!(agent, 0)
+simulate!(agent, 0)
 
 #-
 
@@ -134,7 +134,7 @@ inputs = [
     1,
     1,
 ]
-give_inputs!(agent, inputs)
+simulate!(agent, inputs)
 
 # ### Getting History
 

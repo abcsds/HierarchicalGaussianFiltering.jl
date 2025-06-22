@@ -85,7 +85,7 @@ set_parameters!(
 input = [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0]
 
 # Give inputs and generate actions
-actions = give_inputs!(agent, input)
+actions = simulate!(agent, input)
 
 # Get the history of a single state in the agent
 get_history(agent, ("xbin", "prediction_mean"))

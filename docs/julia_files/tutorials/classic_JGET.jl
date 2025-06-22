@@ -34,7 +34,7 @@ set_parameters!(agent, parameters)
 reset!(agent)
 
 #Simulate updates and actions
-actions = give_inputs!(agent, inputs);
+actions = simulate!(agent, inputs);
 #Plot belief trajectories
 plot_trajectory(agent, "u")
 plot_trajectory!(agent, "x")

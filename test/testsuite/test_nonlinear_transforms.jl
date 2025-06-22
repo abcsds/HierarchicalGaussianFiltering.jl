@@ -50,6 +50,6 @@ using Distributions
         #Add gaussian noise
         inputs = rand(Normal(0, 0.5), length(inputs)) + inputs
 
-        give_inputs!(hgf, inputs)
+        multiple_inputs!(hgf, inputs)
     end
 end

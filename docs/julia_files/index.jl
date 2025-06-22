@@ -36,7 +36,7 @@ set_parameters!(agent, ("xprob", "initial_precision"), 0.9)
 inputs = [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0];
 
 # ### Give inputs to the agent
-actions = give_inputs!(agent, inputs)
+actions = simulate!(agent, inputs)
 
 # ### Plot state trajectories of input and prediction
 using StatsPlots

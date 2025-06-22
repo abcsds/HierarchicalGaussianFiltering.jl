@@ -144,7 +144,7 @@ agent = init_agent(
 Inputs = [1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0];
 
 ## Give Inputs and save actions
-actions = give_inputs!(agent.substruct, Inputs)
+actions = simulate!(agent.substruct, Inputs)
 
 
 # plot the input and the prediction state from our binary state node

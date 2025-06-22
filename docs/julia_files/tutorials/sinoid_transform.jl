@@ -75,9 +75,9 @@ end
 # ╔═╡ 847373ac-647d-43a3-93a1-92af9772dce0
 begin
     reset!(hgf_linear)
-    give_inputs!(hgf_linear, inputs)
+    multiple_inputs!(hgf_linear, inputs)
     reset!(hgf_nonlinear)
-    give_inputs!(hgf_nonlinear, inputs)
+    multiple_inputs!(hgf_nonlinear, inputs)
 end
 
 # ╔═╡ c7f92940-18c8-4212-8808-8b29d9b870a1

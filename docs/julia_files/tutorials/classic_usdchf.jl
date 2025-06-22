@@ -43,7 +43,7 @@ set_parameters!(agent, parameters)
 reset!(agent)
 
 # Evolve agent
-actions = give_inputs!(agent, inputs);
+actions = simulate!(agent, inputs);
 
 # Plot trajectories
 plot_trajectory(

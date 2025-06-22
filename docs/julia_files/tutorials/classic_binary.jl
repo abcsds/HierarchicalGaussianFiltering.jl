@@ -38,7 +38,7 @@ agent_parameters = Dict("action_noise" => 0.2);
 agent = premade_agent("hgf_unit_square_sigmoid", hgf, agent_parameters, verbose = false);
 
 # Evolve agent and save actions
-actions = give_inputs!(agent, inputs);
+actions = simulate!(agent, inputs);
 
 # Plot the trajectory of the agent
 plot_trajectory(agent, ("u", "input_value"))

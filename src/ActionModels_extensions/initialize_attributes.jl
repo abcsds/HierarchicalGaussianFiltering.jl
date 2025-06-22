@@ -22,6 +22,6 @@ end
 function ActionModels.get_state_types(hgf::HGF)
     #Return a NamedTuple, all states are Float64
     return NamedTuple(
-        map(state_name -> state_name => Float64, collect(keys(hgf.state_interface))),
+        map(state_name -> state_name => Union{Missing,Float64}, collect(keys(hgf.state_interface))),
     )
 end

@@ -60,7 +60,7 @@ agent_continuous_2_level =
     premade_agent("hgf_gaussian", continuous_2_level, verbose = false);
 
 # Evolve agent plot trajetories
-give_inputs!(agent_continuous_2_level, inputs_continuous);
+simulate!(agent_continuous_2_level, inputs_continuous);
 plot_trajectory(
     agent_continuous_2_level,
     "xvol",
@@ -87,7 +87,7 @@ JGET = premade_hgf("JGET");
 agent_JGET = premade_agent("hgf_gaussian", JGET, verbose = false);
 
 # Evolve agent plot trajetories
-give_inputs!(agent_JGET, inputs_continuous);
+simulate!(agent_JGET, inputs_continuous);
 plot_trajectory(
     agent_JGET,
     "xvol",
@@ -115,7 +115,7 @@ agent_binary_2_level =
     premade_agent("hgf_unit_square_sigmoid", hgf_binary_2_level, verbose = false);
 
 # Evolve agent plot trajetories
-give_inputs!(agent_binary_2_level, inputs_binary);
+simulate!(agent_binary_2_level, inputs_binary);
 plot_trajectory(agent_binary_2_level, ("u", "input_value"))
 plot_trajectory!(agent_binary_2_level, ("xbin", "prediction"))
 
@@ -139,7 +139,7 @@ agent_binary_3_level =
     premade_agent("hgf_unit_square_sigmoid", hgf_binary_3_level, verbose = false);
 
 # Evolve agent plot trajetories
-give_inputs!(agent_binary_3_level, inputs_binary);
+simulate!(agent_binary_3_level, inputs_binary);
 plot_trajectory(agent_binary_3_level, ("u", "input_value"))
 plot_trajectory!(agent_binary_3_level, ("xbin", "prediction"))
 

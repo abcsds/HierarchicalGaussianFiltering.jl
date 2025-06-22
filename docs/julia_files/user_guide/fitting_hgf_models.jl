@@ -66,7 +66,7 @@ inputs =
     [0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0];
 
 # Evolve agent and save actions
-actions = give_inputs!(agent, inputs)
+actions = simulate!(agent, inputs)
 
 
 # We can  by plotting the actions our agent has produced.

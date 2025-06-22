@@ -14,7 +14,7 @@ using Test
         )
 
         #Give inputs to the agent
-        actions = give_inputs!(test_agent, [0.01, 0.02, 0.03])
+        actions = simulate!(test_agent, [0.01, 0.02, 0.03])
 
         #Check that actions are floats
         @test actions isa Vector
@@ -33,7 +33,7 @@ using Test
         )
 
         #Give inputs to the agent
-        actions = give_inputs!(test_agent, [1, 0, 1])
+        actions = simulate!(test_agent, [1, 0, 1])
 
         #Check that actions are floats
         @test actions isa Vector
@@ -53,7 +53,7 @@ using Test
         )
 
         #Give inputs to the agent
-        actions = give_inputs!(test_agent, [1, 0, 1])
+        actions = simulate!(test_agent, [1, 0, 1])
 
         #Check that actions are floats
         @test actions isa Vector

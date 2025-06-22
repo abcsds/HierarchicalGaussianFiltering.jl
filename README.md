@@ -68,7 +68,7 @@ nothing #hide
 ### Give inputs to the agent
 
 ````@example index
-actions = give_inputs!(agent, inputs)
+actions = simulate!(agent, inputs)
 ````
 ![Image1](docs/src/images/readme/actions.png)
 ### Plot state trajectories of input and prediction
