@@ -12,14 +12,12 @@
 
 # #Load data for examples
 
-using HierarchicalGaussianFiltering #hide
-using ActionModels #hide
-using CSV #hide
-using DataFrames #hide
-using Plots #hide
-using StatsPlots #hide
+using HierarchicalGaussianFiltering
+using ActionModels 
+using CSV 
+using DataFrames 
+using StatsPlots 
 
-#CSV.read(pwd(), DataFrame)
 
 hgf_path_continuous = dirname(dirname(pathof(HierarchicalGaussianFiltering))); #hide
 hgf_path_continuous = hgf_path_continuous * "/docs/julia_files/tutorials/data/"; #hide

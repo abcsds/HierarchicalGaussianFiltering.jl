@@ -36,11 +36,6 @@ function premade_continuous_2level(config::Dict; verbose::Bool = true)
         "save_history" => true,
     )
 
-    #Warn the user about used defaults and misspecified keys
-    if verbose
-        warn_premade_defaults(spec_defaults, config)
-    end
-
     #Merge to overwrite defaults
     config = merge(spec_defaults, config)
 

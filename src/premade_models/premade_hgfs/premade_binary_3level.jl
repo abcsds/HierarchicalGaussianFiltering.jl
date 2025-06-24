@@ -42,11 +42,6 @@ function premade_binary_3level(config::Dict; verbose::Bool = true)
         "save_history" => true,
     )
 
-    #Warn the user about used defaults and misspecified keys
-    if verbose
-        warn_premade_defaults(defaults, config)
-    end
-
     #Merge to overwrite defaults
     config = merge(defaults, config)
 
