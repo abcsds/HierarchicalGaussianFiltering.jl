@@ -44,7 +44,7 @@ function  ActionModels.ActionModel(config::HGFSoftmax)
             #Throw an error that will reject samples when fitted
             throw(
                 RejectParameters(
-                    "With these parameters and inputs, the mean of the gaussian action became $μ, which is invalid. Try other parameter settings",
+                    "With these parameters and inputs, the mean of the gaussian action became $action_probability, which is invalid. Try other parameter settings",
                 ),
             )
         end
