@@ -140,7 +140,7 @@ function init_hgf(;
                     #Add the right names
                     parameter_interface[Symbol(
                         join(
-                            (parent_name, node.name, "coupling_strength"),
+                            (node.name, parent_name, "coupling_strength"),
                             node_attribute_separator,
                         ),
                     )] = (node.name, parent_name, "coupling_strength")
