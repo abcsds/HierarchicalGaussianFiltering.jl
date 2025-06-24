@@ -209,8 +209,8 @@ using StatsPlots
     @testset "Categorical 3level Predict" begin
 
         #Set inputs and responses 
-        test_input = [1, 0, 0, 1, 1]
-        test_responses = [1, 0, 1, 1, 0]
+        test_input = [1, 1, 2, 3, 3]
+        test_responses = [1, 1, 2, 3, 1]
 
         #Create HGF
         hgf = premade_hgf("categorical_3level", verbose = false)
