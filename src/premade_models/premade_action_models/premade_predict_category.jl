@@ -20,7 +20,7 @@ function  ActionModels.ActionModel(config::HGFPredictCategory)
     target_state = Symbol(join((config.target_node, "prediction"), "_"))
 
     #Create action model function
-    am_function = function hgf_gaussian(attributes::ModelAttributes, hgf_observation::Int64)
+    am_function = function hgf_predict_category(attributes::ModelAttributes, hgf_observation::Int64)
 
         #Extract HGF
         hgf = attributes.submodel

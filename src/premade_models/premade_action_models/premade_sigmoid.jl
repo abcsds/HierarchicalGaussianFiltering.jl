@@ -19,7 +19,7 @@ function  ActionModels.ActionModel(config::HGFSigmoid)
     target_state = config.target_state
 
     #Create action model function
-    am_function = function hgf_gaussian(
+    am_function = function hgf_sigmoid(
         attributes::ModelAttributes,
         hgf_observation::R,
     ) where {R<:Real}
