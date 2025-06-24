@@ -214,6 +214,7 @@ using StatsPlots
 
         #Create HGF
         hgf = premade_hgf("categorical_3level", verbose = false)
+        action_model = ActionModel(HGFPredictCategory(; HGF = hgf))
 
         prior = (
             action_noise = LogNormal(),
