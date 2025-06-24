@@ -1,6 +1,5 @@
 using Test
 using HierarchicalGaussianFiltering
-using Distributions
 
 @testset "Testing nonlinear transforms" begin
 
