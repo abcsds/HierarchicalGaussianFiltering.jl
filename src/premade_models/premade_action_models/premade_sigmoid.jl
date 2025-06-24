@@ -2,7 +2,7 @@ export HGFSigmoid
 
 Base.@kwdef struct HGFSigmoid <: ActionModels.AbstractPremadeModel
     action_noise::Float64 = 1.0
-    target_state::Symbol = :x_posterior_mean
+    target_state::Symbol = :xbin_prediction_mean
     HGF::Union{HGF,String} = "continuous_2level"
 end
 
@@ -44,7 +44,7 @@ function  ActionModels.ActionModel(config::HGFSigmoid)
             #Throw an error that will reject samples when fitted
             throw(
                 RejectParameters(
-                    "With these parameters and inputs, the mean of the gaussian action became $μ, which is invalid. Try other parameter settings",
+                    "With these parameters and inputs, the mean of the gaussian action became $action_probability, which is invalid. Try other parameter settings",
                 ),
             )
         end
