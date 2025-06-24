@@ -7,6 +7,7 @@ Glob = "c27321d9-0574-5035-807b-f59d2c89b15c"
 HierarchicalGaussianFiltering = "63d42c3e-681c-42be-892f-a47f35336a79"
 Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 Documenter = "1"
