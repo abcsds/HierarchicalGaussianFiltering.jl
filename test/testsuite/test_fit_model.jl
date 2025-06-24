@@ -1,6 +1,7 @@
 using Test
 
 using HierarchicalGaussianFiltering
+using ActionModels
 using ActionModels: DataFrames
 
 using StatsPlots
@@ -154,7 +155,7 @@ using StatsPlots
 
         prior = (
             action_noise = LogNormal(),
-            xprob_volatility = Normal(-6, 3),
+            xprob_volatility = truncated(Normal(-6, 1), upper = -3),
         )
 
         model = create_model(
@@ -162,6 +163,7 @@ using StatsPlots
             prior,
             test_input,
             test_responses;
+            check_parameter_rejections = true,
         )
 
         posterior_chains = sample_posterior!(
@@ -185,7 +187,7 @@ using StatsPlots
 
         prior = (
             action_noise = LogNormal(),
-            xprob_volatility = Normal(-6, 3),
+            xprob_volatility = truncated(Normal(-9, 1), upper = -3),
         )
 
         model = create_model(
@@ -193,6 +195,7 @@ using StatsPlots
             prior,
             test_input,
             test_responses;
+            check_parameter_rejections = true,
         )
 
         posterior_chains = sample_posterior!(
@@ -214,7 +217,7 @@ using StatsPlots
 
         prior = (
             action_noise = LogNormal(),
-            xprob_volatility = Normal(-6, 3),
+            xprob_volatility = truncated(Normal(-9, 1), upper = -3),
         )
 
         model = create_model(
@@ -222,6 +225,7 @@ using StatsPlots
             prior,
             test_input,
             test_responses;
+            check_parameter_rejections = true,
         )
 
         posterior_chains = sample_posterior!(
