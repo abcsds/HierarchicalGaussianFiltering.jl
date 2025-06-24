@@ -67,48 +67,28 @@ get_parameters(Binary_2_level_hgf)
 
 # We initialize the action model and create it. In a softmax action model we need a parameter from the agent called softmax action precision which is used in the update step of the action model. 
 
-using Distributions
-function binary_softmax(agent, input)
+function hgf_softmax(
+        attributes::ModelAttributes,
+        hgf_observation::Int64,
+    )
+        #Extract HGF
+        hgf = attributes.submodel
 
-    ##------- Staty by getting all information ---------
+        #Extract inverse temperature
+        β = 1/load_parameters(attributes).action_noise
 
+        #Update the HGF
+        update_hgf!(hgf, hgf_observation)
 
-    ##Get HGF from the agents' substruct
-    hgf = agent.substruct
+        #Extract the predicted probability
+        value = get_states(hgf, :binary_state_node_prediction_mean)
 
-    ##Take out the target state from the agents' settings. The target state will be specified in the agent
-    target_state = agent.settings["target_state"]
+        #Calculate the action probability with a binary softmax
+        action_probability = logistic(value * β)
 
-    ##Take out the parameter from our agent
-    action_noise = agent.parameters["action_noise"]
-
-    ##Get the specified state out of the hgf
-    target_value = get_states(hgf, target_state)
-
-    ##--------------- Update step starts  -----------------
-
-    ##Use sotmax to get the action probability 
-    action_probability = 1 / (1 + exp(action_noise * target_value))
-
-    ##---------------- Update step end  ------------------
-    ##If the action probability is not between 0 and 1
-    #if !(0 <= action_probability <= 1)
-    ##Throw an error that will reject samples when fitted
-    ##throw(
-    ##RejectParameters(
-    ## "With these parameters and inputs, the action probability became $action_probability, which should be between 0 and 1. Try other parameter settings",
-    ##),
-    ##)
-    ##end
-
-    ##---------------- Get action distribution  ------------------
-
-    ##Create Bernoulli normal distribution with mean of the target value and a standard deviation from parameters
-    distribution = Distributions.Bernoulli(action_probability)
-
-    ##Return the action distribution
-    return distribution
-end
+        #Create Bernoulli distribution with mean of the target value and a standard deviation from parameters
+        return Bernoulli(action_probability)
+    end
 
 # ## Creating an agent using our action model and having our HGF as substruct
 
@@ -117,41 +97,47 @@ end
 
 # Let's define our action model
 
-action_model = binary_softmax;
+am_function = hgf_softmax;
 
-# The parameter of the agent is just softmax action precision. We set this value to 1
+# The parameter of the agent is just softmax action noise. We set this value to 1
 
-parameters = Dict("action_noise" => 1);
+parameters = (action_noise = Parameter(1.0),)
 
 # The states of the agent are empty, but the states from the HGF will be accessible.
 
-states = Dict()
-
-# In the settings we specify what our target state is. We want it to be the prediction mean of our binary state node.
-
-settings = Dict("target_state" => ("binary_state_node", "prediction_mean"));
+states = (;)
 
 ## Let's initialize our agent
-agent = init_agent(
-    action_model,
-    substruct = Binary_2_level_hgf,
+
+#Define observations and actions
+observations = (; hgf_observation = Observation(Int64))
+actions = (; report = Action(Bernoulli),)
+
+#Create final action model
+action_model = ActionModel(
+    am_function,
     parameters = parameters,
     states = states,
-    settings = settings,
+    observations = observations,
+    actions = actions,
+    submodel = Binary_2_level_hgf,
 )
 
+## Create agent for simulation
+agent = init_agent(action_model)
+
+
 ## Define inputs
-Inputs = [1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0];
+inputs = [1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0];
 
 ## Give Inputs and save actions
-actions = simulate!(agent.substruct, Inputs)
+actions = simulate!(agent, inputs)
 
 
 # plot the input and the prediction state from our binary state node
 
-using Plots
 using StatsPlots
 
-plot_trajectory(agent, ("Input_node", "input_value"))
+plot(agent, "Input_node")
 
-plot_trajectory!(agent, ("binary_state_node", "prediction"))
+plot!(agent, "binary_state_node")
