@@ -1,16 +1,8 @@
-@recipe function f(agent::Union{Agent{<:HGF},HGF}, node::String;)
-
-    #Check that the node and state are of the correct type
-    if !(node isa Union{Symbol,String})
-        throw(ArgumentError("The node must be a Symbol or String, got $(typeof(node))"))
-    end
-    if !(state isa Union{Symbol,String,Nothing})
-        throw(
-            ArgumentError(
-                "The state must be a Symbol, String or Nothing, got $(typeof(state))",
-            ),
-        )
-    end
+@recipe function f(
+    agent::Union{Agent{<:HGF},HGF},
+    node::String,
+    state::Union{String,Nothing} = nothing;
+)
 
     #Extract HGF
     if agent isa Agent{HGF}
@@ -28,21 +20,24 @@
     #Extract node
     selected_node = hgf.all_nodes[node]
 
-    #Plot posterior for continuous state nodes
-    if selected_node isa ContinuousStateNode
-        state = "posterior"
+    #If default state is used
+    if isnothing(state)
+        #Plot posterior for continuous state nodes
+        if selected_node isa ContinuousStateNode
+            state = "posterior"
 
-        #Plot prediction for binary state nodes
-    elseif selected_node isa BinaryStateNode
-        state = "prediction"
+            #Plot prediction for binary state nodes
+        elseif selected_node isa BinaryStateNode
+            state = "prediction"
 
-        #Plot prediction for categorical state nodes
-    elseif selected_node isa CategoricalStateNode
-        state = "prediction"
+            #Plot prediction for categorical state nodes
+        elseif selected_node isa CategoricalStateNode
+            state = "prediction"
 
-        #Plot the input value for input nodes
-    elseif selected_node isa AbstractInputNode
-        state = "input_value"
+            #Plot the input value for input nodes
+        elseif selected_node isa AbstractInputNode
+            state = "input_value"
+        end
     end
 
     #Get x-axis; the number of timesteps
