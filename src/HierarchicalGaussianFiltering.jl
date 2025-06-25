@@ -1,15 +1,15 @@
 module HierarchicalGaussianFiltering
 
 #Load packages
-using ActionModels, Distributions, RecipesBase
+using Reexport
+@reexport using ActionModels
+using RecipesBase
+
+import ActionModels: Agent
 
 #Export functions
-export init_node, init_hgf, premade_hgf, check_hgf, update_hgf!
+export init_node, init_hgf, premade_hgf, check_hgf, update_hgf!, multiple_inputs!
 export get_prediction, get_surprise
-export premade_agent,
-    init_agent, plot_trajectory, plot_trajectory!
-export get_history,
-    get_parameters, get_states, set_parameters!, reset!, give_inputs!, set_save_history!
 export ParameterGroup
 export EnhancedUpdate, ClassicUpdate
 export NodeDefaults
@@ -24,30 +24,25 @@ export DriftCoupling,
     LinearTransform,
     NonlinearTransform
 
-#Add premade agents to shared dict at initialization
-function __init__()
-    ActionModels.premade_agents["hgf_gaussian"] = premade_hgf_gaussian
-    ActionModels.premade_agents["hgf_binary_softmax"] = premade_hgf_binary_softmax
-    ActionModels.premade_agents["hgf_unit_square_sigmoid"] = premade_hgf_unit_square_sigmoid
-    ActionModels.premade_agents["hgf_predict_category"] = premade_hgf_predict_category
-end
+
+const node_attribute_separator = "_"
 
 #Types for HGFs
 include("create_hgf/hgf_structs.jl")
 
-#Overloading ActionModels functions
-include("ActionModels_variations/create_premade_agent.jl")
-include("ActionModels_variations/plot_trajectory.jl")
-include("ActionModels_variations/get_history.jl")
-include("ActionModels_variations/get_parameters.jl")
-include("ActionModels_variations/get_states.jl")
-include("ActionModels_variations/give_inputs.jl")
-include("ActionModels_variations/reset.jl")
-include("ActionModels_variations/set_parameters.jl")
-include("ActionModels_variations/set_save_history.jl")
+#Extending ActionModels functions
+include("ActionModels_extensions/initialize_attributes.jl")
+include("ActionModels_extensions/manipulate_attributes.jl")
+include("ActionModels_extensions/plot_trajectory.jl")
+include("ActionModels_extensions/simulation.jl")
+include("ActionModels_extensions/manipulate_hgf/set_parameters.jl")
+include("ActionModels_extensions/manipulate_hgf/get_parameters.jl")
+include("ActionModels_extensions/manipulate_hgf/get_states.jl")
+include("ActionModels_extensions/manipulate_hgf/reset.jl")
 
 #Functions for updating the HGF
 include("update_hgf/update_hgf.jl")
+include("update_hgf/multiple_inputs.jl")
 include("update_hgf/nonlinear_transforms.jl")
 include("update_hgf/node_updates/continuous_input_node.jl")
 include("update_hgf/node_updates/continuous_state_node.jl")
@@ -63,10 +58,10 @@ include("create_hgf/init_node_edge.jl")
 include("create_hgf/create_premade_hgf.jl")
 
 #Functions for premade agents
-include("premade_models/premade_agents/premade_gaussian.jl")
-include("premade_models/premade_agents/premade_predict_category.jl")
-include("premade_models/premade_agents/premade_sigmoid.jl")
-include("premade_models/premade_agents/premade_softmax.jl")
+include("premade_models/premade_action_models/premade_gaussian.jl")
+include("premade_models/premade_action_models/premade_predict_category.jl")
+include("premade_models/premade_action_models/premade_sigmoid.jl")
+include("premade_models/premade_action_models/premade_softmax.jl")
 
 include("premade_models/premade_hgfs/premade_binary_2level.jl")
 include("premade_models/premade_hgfs/premade_binary_3level.jl")
@@ -79,5 +74,6 @@ include("premade_models/premade_hgfs/premade_JGET.jl")
 include("utils/get_prediction.jl")
 include("utils/get_surprise.jl")
 include("utils/pretty_printing.jl")
+include("utils/set_save_history.jl")
 
 end

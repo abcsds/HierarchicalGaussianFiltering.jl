@@ -1,77 +1,3 @@
-"""
-    init_hgf(;
-        input_nodes::Union{String,Dict,Vector},
-        state_nodes::Union{String,Dict,Vector},
-        edges::Union{Vector{<:Dict},Dict},
-        node_defaults::Dict = Dict(),
-        update_order::Union{Nothing,Vector{String}} = nothing,
-        verbose::Bool = true,
-    )
-
-Initialize an HGF.
-Node information includes 'name' and 'type' as keys, as well as any other parameters that are specific to the node type.
-Edge information includes 'child', as well as 'value_parents' and/or 'volatility_parents' as keys. Parents are vectors of either node name strings, or tuples with node names and coupling strengths.
-
-# Arguments
- - 'input_nodes::Union{String,Dict,Vector}': Input nodes to be created. Can either be a string with a node name, a dictionary with node information, or a vector of strings and/or dictionaries.
- - 'state_nodes::Union{String,Dict,Vector}': State nodes to be created. Can either be a string with a node name, a dictionary with node information, or a vector of strings and/or dictionaries.
- - 'edges::Union{Vector{<:Dict},Dict}': Edges to be created. Can either be a dictionary with edge information, or a vector of dictionaries.
- - 'node_defaults::Dict = Dict()': A dictionary with default values for the nodes. If a node is created without specifying a value for a parameter, the default value is used.
- - 'update_order::Union{Nothing,Vector{String}} = nothing': The order in which the nodes are updated. If set to nothing, the update order is determined automatically.
- - 'verbose::Bool = true': If set to false, warnings are hidden.
-
-# Examples
-```julia
-##Create a simple 2level continuous HGF##
-
-#Set defaults for nodes
-node_defaults = Dict(
-    "volatility" => -2,
-    "input_noise" => -2,
-    "initial_mean" => 0,
-    "initial_precision" => 1,
-    "coupling_strength" => 1,
-)
-
-#List of input nodes
-input_nodes = Dict(
-    "name" => "u",
-    "type" => "continuous",
-    "input_noise" => -2,
-)
-
-#List of state nodes
-state_nodes = [
-    Dict(
-        "name" => "x",
-        "type" => "continuous",
-        "volatility" => -2,
-        "initial_mean" => 0,
-        "initial_precision" => 1,
-    ),
-    Dict(
-        "name" => "xvol",
-        "type" => "continuous",
-        "volatility" => -2,
-        "initial_mean" => 0,
-        "initial_precision" => 1,
-    ),
-]
-
-#List of child-parent relations
-edges = Dict(
-    ("u", "x") -> ObservationCoupling()
-    ("x", "xvol") -> VolatilityCoupling()
-)
-
-hgf = init_hgf(
-    input_nodes = input_nodes,
-    state_nodes = state_nodes,
-    edges = edges,
-    node_defaults = node_defaults,
-)
-```
-"""
 function init_hgf(;
     nodes::Vector{<:AbstractNodeInfo},
     edges::Dict{Tuple{String,String},<:CouplingType},
@@ -89,6 +15,10 @@ function init_hgf(;
     state_nodes_dict = Dict{String,AbstractStateNode}()
     input_nodes_inputted_order = Vector{String}()
     state_nodes_inputted_order = Vector{String}()
+
+    #Dictionaries for storing the interface between symbol param/state names and the positions in the node
+    parameter_interface = Dict{Symbol,Union{String,Tuple}}()
+    state_interface = Dict{Symbol,Union{String,Tuple}}()
 
     #For each specified input node
     for node_info in nodes
@@ -185,17 +115,77 @@ function init_hgf(;
         end
     end
 
-    #initializing shared parameters
+    #Initializing shared parameters
     parameter_groups_dict = Dict()
 
     #Go through each specified shared parameter
     for parameter_group in parameter_groups
 
         #Add as a GroupedParameters to the shared parameter dictionary
-        parameter_groups_dict[parameter_group.name] = ActionModels.GroupedParameters(
+        parameter_groups_dict[parameter_group.name] = GroupedParameters(
             value = parameter_group.value,
             grouped_parameters = parameter_group.parameters,
         )
+    end
+
+
+
+    ## Create ActionModels interface for manipulating attributes ##
+    for node in ordered_nodes.all_nodes
+        for parameter_name in String.(fieldnames(typeof(node.parameters)))
+            #For coupling strengths
+            if parameter_name == "coupling_strengths"
+                #Go through each parent and corresponding coupling strength
+                for (parent_name, coupling_strength) in node.parameters.coupling_strengths
+                    #Add the right names
+                    parameter_interface[Symbol(
+                        join(
+                            (node.name, parent_name, "coupling_strength"),
+                            node_attribute_separator,
+                        ),
+                    )] = (node.name, parent_name, "coupling_strength")
+                end
+                #For coupling transforms
+            elseif parameter_name == "coupling_transforms"
+                #Go through each parent and corresponding transform
+                for (parent_name, coupling_transform) in node.parameters.coupling_transforms
+                    #Go through each parameter of the transform
+                    for coupling_parameter in keys(coupling_transform.parameters)
+                        #Add the right names
+                        parameter_interface[Symbol(
+                            join(
+                                (node.name, parent_name, coupling_parameter),
+                                node_attribute_separator,
+                            ),
+                        )] = (node.name, parent_name, coupling_parameter)
+                    end
+                end
+                #For other parameters
+            else
+                parameter_interface[Symbol(
+                    join((node.name, parameter_name), node_attribute_separator),
+                )] = (node.name, parameter_name)
+            end
+        end
+        #Add parameter groups
+        if length(parameter_groups_dict) > 0
+            #For each parameter group
+            for (parameter_group_name, grouped_parameters) in parameter_groups_dict
+                #Remove grouped parameters from the interface
+                filter!(
+                    ((k, v),) -> v ∉ grouped_parameters.grouped_parameters,
+                    parameter_interface,
+                )
+                #Add the paramerter group to the interface
+                parameter_interface[Symbol(parameter_group_name)] = parameter_group_name
+            end
+        end
+        #Add joined names for states to the ActionModels interface
+        for state_name in String.(fieldnames(typeof(node.states)))
+            state_interface[Symbol(
+                join((node.name, state_name), node_attribute_separator),
+            )] = (node.name, state_name)
+        end
     end
 
     ### Create HGF struct ###
@@ -205,6 +195,8 @@ function init_hgf(;
         state_nodes_dict,
         ordered_nodes,
         parameter_groups_dict,
+        parameter_interface,
+        state_interface,
         save_history,
         [0],
     )

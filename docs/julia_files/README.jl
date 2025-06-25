@@ -1,3 +1,10 @@
+# [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ComputationalPsychiatry.github.io/HierarchicalGaussianFiltering.jl/stable/)
+# [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://computationalpsychiatry.github.io/HierarchicalGaussianFiltering.jl)
+# [![Build Status](https://github.com/computationalpsychiatry/HierarchicalGaussianFiltering.jl/actions/workflows/CI_full.yml/badge.svg?branch=main)](https://github.com/computationalpsychiatry/HierarchicalGaussianFiltering.jl/actions/workflows/CI_full.yml?query=branch%3Amain)
+# [![Coverage](https://codecov.io/gh/computationalpsychiatry/HierarchicalGaussianFiltering.jl/branch/main/graph/badge.svg?token=NVFiiPydFA)](https://codecov.io/gh/computationalpsychiatry/HierarchicalGaussianFiltering.jl)
+# [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+# [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
+
 # # Welcome to The Hierarchical Gaussian Filtering Package!
 
 # Hierarchical Gaussian Filtering (HGF) is a novel and adaptive package for doing cognitive and behavioral modelling. With the HGF you can fit time series data fit participant-level individual parameters, measure group differences based on model-specific parameters or use the model for any time series with underlying change in uncertainty.
