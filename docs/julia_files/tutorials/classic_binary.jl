@@ -49,7 +49,7 @@ plot(agent, ("xvol", "posterior"))
 
 
 # Set priors for parameter recovery
-prior = (xprob_volatility = Normal(-3.0, 0.5);)
+prior = (; xprob_volatility = Normal(-3.0, 0.5))
 
 #-
 # Get the actions from the MATLAB tutorial
