@@ -13,10 +13,10 @@
 # #Load data for examples
 
 using HierarchicalGaussianFiltering
-using ActionModels 
-using CSV 
-using DataFrames 
-using StatsPlots 
+using ActionModels
+using CSV
+using DataFrames
+using StatsPlots
 
 
 hgf_path_continuous = dirname(dirname(pathof(HierarchicalGaussianFiltering))); #hide
@@ -57,8 +57,7 @@ continuous_2_level = premade_hgf("continuous_2level");
 
 action_model = ActionModel(HGFGaussian(; HGF = continuous_2_level))
 
-agent_continuous_2_level =
-   init_agent(action_model);
+agent_continuous_2_level = init_agent(action_model);
 
 # Evolve agent plot trajetories
 simulate!(agent_continuous_2_level, inputs_continuous);
@@ -116,8 +115,7 @@ hgf_binary_2_level = premade_hgf("binary_2level", verbose = false);
 action_model_binary_2_level = ActionModel(HGFSoftmax(; HGF = hgf_binary_2_level))
 
 # Create an agent
-agent_binary_2_level =
-    init_agent(action_model_binary_2_level);
+agent_binary_2_level = init_agent(action_model_binary_2_level);
 
 # Evolve agent plot trajetories
 simulate!(agent_binary_2_level, inputs_binary);
@@ -142,8 +140,7 @@ hgf_binary_3_level = premade_hgf("binary_3level", verbose = false);
 action_model_binary_3_level = ActionModel(HGFSoftmax(; HGF = hgf_binary_3_level))
 
 # Create an agent
-agent_binary_3_level =
-    init_agent(action_model_binary_3_level);
+agent_binary_3_level = init_agent(action_model_binary_3_level);
 
 # Evolve agent plot trajetories
 simulate!(agent_binary_3_level, inputs_binary);

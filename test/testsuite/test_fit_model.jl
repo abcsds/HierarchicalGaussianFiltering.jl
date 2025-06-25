@@ -58,18 +58,15 @@ using StatsPlots
     ad_type = AutoForwardDiff()
 
     @testset "test full inference procedure" begin
-        
+
         #Create HGF
         hgf = premade_hgf("continuous_2level", verbose = false)
 
         #Create action model
         action_model = ActionModel(HGFGaussian(; HGF = hgf))
-        
+
         #Set priors
-        prior = (
-            action_noise = LogNormal(),
-            x_volatility = Normal(-6, 3),
-        )
+        prior = (action_noise = LogNormal(), x_volatility = Normal(-6, 3))
 
         #Create model
         model = create_model(
@@ -94,15 +91,16 @@ using StatsPlots
         posterior_parameters = get_session_parameters!(model, :posterior)
         posterior_parameters_df = summarize(posterior_parameters)
 
-        posterior_trajectories = get_state_trajectories!(model, [:x_value_prediction_error], :posterior)
+        posterior_trajectories =
+            get_state_trajectories!(model, [:x_value_prediction_error], :posterior)
         posterior_trajectories_df = summarize(posterior_trajectories)
 
-        prior_chains =
-            sample_prior!(model, n_samples = n_samples, n_chains = n_chains)
+        prior_chains = sample_prior!(model, n_samples = n_samples, n_chains = n_chains)
         plot(prior_chains)
         prior_parameters = get_session_parameters!(model, :prior)
         summarize(prior_parameters)
-        prior_trajectories = get_state_trajectories!(model, [:x_value_prediction_error], :prior)
+        prior_trajectories =
+            get_state_trajectories!(model, [:x_value_prediction_error], :prior)
         summarize(prior_trajectories)
     end
 
@@ -117,20 +115,12 @@ using StatsPlots
 
         #Create action model
         action_model = ActionModel(HGFGaussian(; HGF = hgf))
-        
+
         #Set priors
-        prior = (
-            action_noise = LogNormal(),
-            x_volatility = Normal(-6, 3),
-        )
-        
+        prior = (action_noise = LogNormal(), x_volatility = Normal(-6, 3))
+
         #Create model
-        model = create_model(
-            action_model,
-            prior,
-            observations,
-            actions;
-        )
+        model = create_model(action_model, prior, observations, actions;)
 
         #Sample Posterior
         posterior_chains = sample_posterior!(

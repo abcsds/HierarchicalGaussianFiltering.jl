@@ -80,14 +80,11 @@ priors = (
 );
 
 # Do parameter recovery
-model = create_model(action_model, priors, inputs, actions, check_parameter_rejections = true)
+model =
+    create_model(action_model, priors, inputs, actions, check_parameter_rejections = true)
 
 #Fit 
-posterior_chains = sample_posterior!(
-    model,
-    n_samples = 200,
-    n_chains = 2,
-)
+posterior_chains = sample_posterior!(model, n_samples = 200, n_chains = 2)
 
 #-
 # Plot the chains

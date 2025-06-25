@@ -67,28 +67,25 @@ get_parameters(Binary_2_level_hgf)
 
 # We initialize the action model and create it. In a softmax action model we need a parameter from the agent called softmax action precision which is used in the update step of the action model. 
 
-function hgf_softmax(
-        attributes::ModelAttributes,
-        hgf_observation::Int64,
-    )
-        #Extract HGF
-        hgf = attributes.submodel
+function hgf_softmax(attributes::ModelAttributes, hgf_observation::Int64)
+    #Extract HGF
+    hgf = attributes.submodel
 
-        #Extract inverse temperature
-        β = 1/load_parameters(attributes).action_noise
+    #Extract inverse temperature
+    β = 1/load_parameters(attributes).action_noise
 
-        #Update the HGF
-        update_hgf!(hgf, hgf_observation)
+    #Update the HGF
+    update_hgf!(hgf, hgf_observation)
 
-        #Extract the predicted probability
-        value = get_states(hgf, :binary_state_node_prediction_mean)
+    #Extract the predicted probability
+    value = get_states(hgf, :binary_state_node_prediction_mean)
 
-        #Calculate the action probability with a binary softmax
-        action_probability = logistic(value * β)
+    #Calculate the action probability with a binary softmax
+    action_probability = logistic(value * β)
 
-        #Create Bernoulli distribution with mean of the target value and a standard deviation from parameters
-        return Bernoulli(action_probability)
-    end
+    #Create Bernoulli distribution with mean of the target value and a standard deviation from parameters
+    return Bernoulli(action_probability)
+end
 
 # ## Creating an agent using our action model and having our HGF as substruct
 

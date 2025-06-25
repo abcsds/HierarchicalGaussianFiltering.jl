@@ -122,5 +122,5 @@ end
 #     merge(
 #         [get_states(node) for node in hgf.ordered_nodes.all_nodes]...
 #         )
-        
+
 # end

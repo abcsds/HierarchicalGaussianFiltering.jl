@@ -60,7 +60,7 @@
 # - volatility coupling
 
 # ### Binary state node rules:
- 
+
 # - Can only have exactly one value parent
 # - Can only have excatly one value child
 # - Can only have a contionus state node as value parent

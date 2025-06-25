@@ -122,4 +122,3 @@ nonlinear_plt = plot(asin.(μ₁_nonlinear), label = "μ₁ asin")
 plot!(μ₂_nonlinear, label = "μ₂", title = "nonlinear")
 
 plot(linear_plt, nonlinear_plt)
-

@@ -73,10 +73,7 @@ get_states(agent, :xbin_posterior_precision)
 set_parameters!(agent, :xvol_initial_precision, 0.4)
 
 # Set multiple parameter values
-set_parameters!(
-    agent,
-    (xvol_initial_precision = 1, xvol_volatility = 0),
-)
+set_parameters!(agent, (xvol_initial_precision = 1, xvol_volatility = 0))
 
 
 # Let us move on to giving a set of inputs to the agent. 
@@ -98,4 +95,3 @@ plot(agent, ("u", "input_value"))
 
 # Let's add prediction mean on top of the plot
 plot!(agent, ("xbin", "prediction_mean"))
-

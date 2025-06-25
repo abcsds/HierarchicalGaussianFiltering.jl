@@ -88,13 +88,15 @@ prior = (; xprob_volatility = Normal(-3.0, 0.5))
 # We can fit the evolution rate by inputting the variables:
 
 # Create model
-model = create_model(action_model, prior, inputs, Int64.(actions), check_parameter_rejections = true)
+model = create_model(
+    action_model,
+    prior,
+    inputs,
+    Int64.(actions),
+    check_parameter_rejections = true,
+)
 
 # Now we can fit the model using the sample_posterior! function.
-posterior_chains = sample_posterior!(
-    model,
-    n_samples = 200,
-    n_chains = 2,
-)
+posterior_chains = sample_posterior!(model, n_samples = 200, n_chains = 2)
 
 plot(posterior_chains)

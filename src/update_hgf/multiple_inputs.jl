@@ -1,11 +1,7 @@
 #### FUNCTIONS FOR GIVING MULTIPLE INPUTS IN A ROW TO AN HGF ####
 
 ### Giving a vector of inputs ###
-function multiple_inputs!(
-    hgf::HGF,
-    inputs::Vector;
-    stepsizes::Union{Real,Vector} = 1,
-)
+function multiple_inputs!(hgf::HGF, inputs::Vector; stepsizes::Union{Real,Vector} = 1)
 
     #Create vector of stepsizes
     if stepsizes isa Real
@@ -28,11 +24,7 @@ end
 
 
 ### Giving a matrix of inputs (multiple per timestep) ###
-function multiple_inputs!(
-    hgf::HGF,
-    inputs::Array;
-    stepsizes::Union{Real,Vector} = 1,
-)
+function multiple_inputs!(hgf::HGF, inputs::Array; stepsizes::Union{Real,Vector} = 1)
 
     #If number of column in input is diffferent from amount of input nodes
     if size(inputs, 2) != length(hgf.input_nodes)

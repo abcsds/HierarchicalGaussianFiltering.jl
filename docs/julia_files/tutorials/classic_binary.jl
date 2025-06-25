@@ -57,14 +57,11 @@ actions = CSV.read(data_path * "classic_binary_actions.csv", DataFrame)[!, 1];
 #-
 # Fit the actions
 #Create model
-model = create_model(action_model, prior, inputs, actions, check_parameter_rejections = true)
+model =
+    create_model(action_model, prior, inputs, actions, check_parameter_rejections = true)
 
 #Fit model
-posterior_chains = sample_posterior!(
-    model,
-    n_samples = 200,
-    n_chains = 2,
-)
+posterior_chains = sample_posterior!(model, n_samples = 200, n_chains = 2)
 #-
 #Plot the chains
 plot(posterior_chains)

@@ -6,7 +6,7 @@ Base.@kwdef struct HGFPredictCategory <: ActionModels.AbstractPremadeModel
     HGF::Union{HGF,String} = "categorical_3level"
 end
 
-function  ActionModels.ActionModel(config::HGFPredictCategory)
+function ActionModels.ActionModel(config::HGFPredictCategory)
 
     #Extract hgf
     if config.HGF isa String
@@ -20,25 +20,26 @@ function  ActionModels.ActionModel(config::HGFPredictCategory)
     target_state = Symbol(join((config.target_node, "prediction"), "_"))
 
     #Create action model function
-    am_function = function hgf_predict_category(attributes::ModelAttributes, hgf_observation::Int64)
+    am_function =
+        function hgf_predict_category(attributes::ModelAttributes, hgf_observation::Int64)
 
-        #Extract HGF
-        hgf = attributes.submodel
+            #Extract HGF
+            hgf = attributes.submodel
 
-        #Extract the inverse temperature
-        β = 1/load_parameters(attributes).action_noise
+            #Extract the inverse temperature
+            β = 1/load_parameters(attributes).action_noise
 
-        #Update the HGF
-        update_hgf!(hgf, hgf_observation)
+            #Update the HGF
+            update_hgf!(hgf, hgf_observation)
 
-        #Extract specified belief state
-        probabilities = get_states(hgf, target_state)[end] #TODO: figure out why the end here is needed
+            #Extract specified belief state
+            probabilities = get_states(hgf, target_state)[end] #TODO: figure out why the end here is needed
 
-        #Softmax transform with the inverse noise as precision
-        probabilities = softmax(probabilities .* β)
+            #Softmax transform with the inverse noise as precision
+            probabilities = softmax(probabilities .* β)
 
-        return Categorical(probabilities)
-    end
+            return Categorical(probabilities)
+        end
 
     parameters = (; action_noise = Parameter(config.action_noise))
 

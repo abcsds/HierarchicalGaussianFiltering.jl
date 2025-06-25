@@ -172,7 +172,10 @@ function init_hgf(;
             #For each parameter group
             for (parameter_group_name, grouped_parameters) in parameter_groups_dict
                 #Remove grouped parameters from the interface
-                filter!(((k,v),) -> v ∉ grouped_parameters.grouped_parameters, parameter_interface)
+                filter!(
+                    ((k, v),) -> v ∉ grouped_parameters.grouped_parameters,
+                    parameter_interface,
+                )
                 #Add the paramerter group to the interface
                 parameter_interface[Symbol(parameter_group_name)] = parameter_group_name
             end

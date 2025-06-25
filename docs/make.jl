@@ -65,8 +65,7 @@ makedocs(;
     ),
     doctest = true,
     pages = [
-        "Introduction to Hierarchical Gaussian Filtering" =>
-            joinpath(".", "index.md"),
+        "Introduction to Hierarchical Gaussian Filtering" => joinpath(".", "index.md"),
         # "Theory" => [
         #     "./theory" * "/genmodel.md",
         #     "./theory" * "/node.md",

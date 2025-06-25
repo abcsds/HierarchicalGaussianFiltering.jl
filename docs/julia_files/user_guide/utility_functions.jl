@@ -45,10 +45,7 @@ get_states(agent)
 get_states(agent, :xprob_posterior_precision)
 
 #getting multiple states
-get_states(
-    agent,
-    (:xprob_posterior_precision, :xprob_effective_prediction_precision),
-)
+get_states(agent, (:xprob_posterior_precision, :xprob_effective_prediction_precision))
 
 
 # ### Setting Parameters
@@ -73,7 +70,10 @@ hgf = premade_hgf("binary_3level", hgf_parameters)
 # Define our agent with the HGF and agent parameter settings
 action_model = ActionModel(HGFSigmoid(; HGF = hgf, action_noise = 1.0))
 
-agent = init_agent(action_model, save_history = [:xbin_prediction_mean, :xvol_posterior_precision])
+agent = init_agent(
+    action_model,
+    save_history = [:xbin_prediction_mean, :xvol_posterior_precision],
+)
 
 
 # Changing a single parameter
@@ -82,10 +82,7 @@ set_parameters!(agent, :xvol_initial_precision, 4)
 
 # Changing multiple parameters
 
-set_parameters!(
-    agent,
-    (xvol_initial_precision = 5, xbin_xprob_coupling_strength = 2.0),
-)
+set_parameters!(agent, (xvol_initial_precision = 5, xbin_xprob_coupling_strength = 2.0))
 
 # ###Giving Inputs
 

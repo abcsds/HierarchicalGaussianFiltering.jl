@@ -9,7 +9,7 @@ data_path = hgf_path * "/docs/julia_files/tutorials/data/"
 
 #Load data
 data = CSV.read(data_path * "classic_cannonball_data.csv", DataFrame)
-inputs = data[(data.ID.==20).&(data.session.==1), :].outcome
+inputs = data[(data.ID .== 20) .& (data.session .== 1), :].outcome
 
 #Create HGF
 hgf = premade_hgf("JGET", verbose = false)
