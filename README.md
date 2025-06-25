@@ -1,11 +1,9 @@
-# HGF
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ComputationalPsychiatry.github.io/HierarchicalGaussianFiltering.jl/stable/)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://computationalpsychiatry.github.io/HierarchicalGaussianFiltering.jl)
 [![Build Status](https://github.com/computationalpsychiatry/HierarchicalGaussianFiltering.jl/actions/workflows/CI_full.yml/badge.svg?branch=main)](https://github.com/computationalpsychiatry/HierarchicalGaussianFiltering.jl/actions/workflows/CI_full.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/computationalpsychiatry/HierarchicalGaussianFiltering.jl/branch/main/graph/badge.svg?token=NVFiiPydFA)](https://codecov.io/gh/computationalpsychiatry/HierarchicalGaussianFiltering.jl)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
-
 
 # Welcome to The Hierarchical Gaussian Filtering Package!
 
@@ -22,105 +20,154 @@ The HGF will be explained in more detail in the theory section of the documentat
 It is also recommended to check out the ActionModels.jl pacakge for stronger intuition behind the use of agents and action models.
 
 ## Getting started
+
 The last official release can be downloaded from Julia with "] add HierarchicalGaussianFiltering"
 
 We provide a script for getting started with commonly used functions and use cases
 
 Load packages
 
-````@example index
+````julia
 using HierarchicalGaussianFiltering
 using ActionModels
 ````
 
-### Get premade agent
-
-````@example index
-premade_agent("help")
-````
-
 ### Create agent
 
-````@example index
-agent = premade_agent("hgf_binary_softmax")
+````julia
+action_model = ActionModel(HGFSoftmax(; HGF = "binary_3level"))
+agent = init_agent(action_model, save_history = :xbin_prediction_mean)
+````
+
+````
+-- ActionModels Agent --
+Action model: hgf_softmax
+This agent has received 0 observations
+
 ````
 
 ### Get states and parameters
 
-````@example index
+````julia
 get_states(agent)
 ````
 
-![Image1](docs/src/images/readme/get_states.png)
+````
+(xvol_prediction_precision = 0.8807970779778823, xbin_posterior_precision = missing, xbin_prediction_precision = missing, xvol_posterior_precision = 1, xprob_value_prediction_error = missing, xprob_precision_prediction_error = missing, xprob_prediction_precision = 0.8807970779778823, xprob_effective_prediction_precision = 0.11920292202211755, xvol_effective_prediction_precision = 0.11920292202211755, xbin_prediction_mean = missing, xvol_posterior_mean = 0, xprob_posterior_precision = 1, xbin_value_prediction_error = missing, xprob_prediction_mean = 0, xprob_posterior_mean = 0, u_input_value = missing, xbin_posterior_mean = missing, xvol_precision_prediction_error = missing, xvol_value_prediction_error = missing, xvol_prediction_mean = 0)
+````
 
-````@example index
+````julia
 get_parameters(agent)
 ````
 
-![Image1](docs/src/images/readme/get_parameters.png)
+````
+(action_noise = 1.0, xprob_drift = 0, xvol_autoconnection_strength = 1, xvol_initial_mean = 0, xbin_xprob_coupling_strength = 1, xprob_autoconnection_strength = 1, xvol_volatility = -2, xprob_initial_precision = 1, xprob_initial_mean = 0, xvol_drift = 0, xvol_initial_precision = 1, xprob_xvol_coupling_strength = 1, xprob_volatility = -2)
+````
 
 Set a new parameter for initial precision of xprob and define some inputs
 
-````@example index
-set_parameters!(agent, ("xprob", "initial_precision"), 0.9)
+````julia
+set_parameters!(agent, (; xprob_initial_precision = 0.9))
 inputs = [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0];
-nothing #hide
 ````
 
 ### Give inputs to the agent
 
-````@example index
+````julia
 actions = simulate!(agent, inputs)
 ````
-![Image1](docs/src/images/readme/actions.png)
+
+````
+24-element Vector{Bool}:
+ 1
+ 1
+ 1
+ 0
+ 0
+ 0
+ 1
+ 0
+ 1
+ 1
+ 0
+ 0
+ 1
+ 1
+ 1
+ 1
+ 0
+ 1
+ 1
+ 0
+ 1
+ 1
+ 0
+ 1
+````
+
 ### Plot state trajectories of input and prediction
 
-````@example index
+````julia
 using StatsPlots
-using Plots
-plot_trajectory(agent, ("u", "input_value"))
-plot_trajectory!(agent, ("x", "prediction"))
+plot(agent, ("u", "input_value"))
+plot!(agent, ("xbin", "prediction"))
 ````
-![Image1](docs/src/images/readme/plot_trajectory.png)
+![](README-24.svg)
 
-Plot state trajectory of input value, action and prediction of x
+Plot state trajectory of input value, action and prediction of xbin
 
-````@example index
-plot_trajectory(agent, ("u", "input_value"))
-plot_trajectory!(agent, "action")
-plot_trajectory!(agent, ("x", "prediction"))
+````julia
+plot(agent, ("u", "input_value"))
+plot!(actions .+ 0.1, seriestype = :scatter, label = "action")
+plot!(agent, ("xbin", "prediction"))
 ````
-![Image1](docs/src/images/readme/plot_trajectory_2.png)
+![](README-26.svg)
+
 ### Fitting parameters
 
-````@example index
-using Distributions
-prior = Dict(("xprob", "volatility") => Normal(1, 0.5))
+````julia
+prior = (; xprob_volatility = Normal(-7, 0.5))
 
 #Create model
-model = create_model(agent, prior, inputs, actions;)
+model = create_model(action_model, prior, inputs, Int64.(actions), check_parameter_rejections = true)
 
-#Fit single chain with 10 iterations
-fitted_model = fit_model(model; n_iterations = 10, n_chains = 1)
+#Fit
+posterior_chains = sample_posterior!(model, n_samples = 200, n_chains = 2)
+````
 
 ````
-![Image1](docs/src/images/readme/fit_model.png)
+Chains MCMC chain (200×13×2 Array{Float64, 3}):
+
+Iterations        = 101:1:300
+Number of chains  = 2
+Samples per chain = 200
+Wall duration     = 3.0 seconds
+Compute duration  = 3.0 seconds
+parameters        = xprob_volatility.session[1]
+internals         = lp, n_steps, is_accept, acceptance_rate, log_density, hamiltonian_energy, hamiltonian_energy_error, max_hamiltonian_energy_error, tree_depth, numerical_error, step_size, nom_step_size
+
+Summary Statistics
+                   parameters      mean       std      mcse   ess_bulk   ess_tail      rhat   ess_per_sec
+                       Symbol   Float64   Float64   Float64    Float64    Float64   Float64       Float64
+
+  xprob_volatility.session[1]   -7.0291    0.4515    0.0297   224.3017   184.8483    1.0106       74.8171
+
+Quantiles
+                   parameters      2.5%     25.0%     50.0%     75.0%     97.5%
+                       Symbol   Float64   Float64   Float64   Float64   Float64
+
+  xprob_volatility.session[1]   -7.8180   -7.3504   -7.0046   -6.7898   -6.1072
+
+````
+
 ### Plot chains
 
-````@example index
-plot(model)
+````julia
+plot(posterior_chains)
 ````
-![Image1](docs/src/images/readme/chains.png)
-### Plot prior angainst posterior
-
-````@example index
-# plot_parameter_distribution(model, prior)
-````
-![Image1](docs/src/images/readme/prior_posterior.png)
-### Get posterior
-
-````@example index
-get_posteriors(model)
-````
+![](README-30.svg)
 
 ---
+
+*This page was generated using [Literate.jl](https://github.com/fredrikekre/Literate.jl).*
+
