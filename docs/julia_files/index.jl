@@ -22,11 +22,9 @@
 using HierarchicalGaussianFiltering
 using ActionModels
 
-# ### Get premade agent
-premade_agent("help")
-
 # ### Create agent
-agent = premade_agent("hgf_binary_softmax")
+action_model = ActionModel(HGFSoftmax(; HGF = "binary_3level"))
+agent = init_agent(action_model, save_history = :xbin_prediction_mean)
 
 # ### Get states and parameters
 get_states(agent)
@@ -34,7 +32,7 @@ get_states(agent)
 get_parameters(agent)
 
 # Set a new parameter for initial precision of xprob and define some inputs
-set_parameters!(agent, ("xprob", "initial_precision"), 0.9)
+set_parameters!(agent, (; xprob_initial_precision = 0.9))
 inputs = [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0];
 
 # ### Give inputs to the agent
@@ -42,36 +40,26 @@ actions = simulate!(agent, inputs)
 
 # ### Plot state trajectories of input and prediction
 using StatsPlots
-using Plots
-plot_trajectory(agent, ("u", "input_value"))
-plot_trajectory!(agent, ("xbin", "prediction"))
+plot(agent, ("u", "input_value"))
+plot!(agent, ("xbin", "prediction"))
 
 # Plot state trajectory of input value, action and prediction of xbin
-plot_trajectory(agent, ("u", "input_value"))
-plot_trajectory!(agent, "action")
-plot_trajectory!(agent, ("xbin", "prediction"))
+plot(agent, ("u", "input_value"))
+plot!(actions .+ 0.1, seriestype = :scatter, label = "action")
+plot!(agent, ("xbin", "prediction"))
 
 
 # ### Fitting parameters
 
-using Distributions
-prior = Dict(("xprob", "volatility") => Normal(-7, 0.5))
+prior = (; xprob_volatility = Normal(-7, 0.5))
 
 #Create model
-model = create_model(agent, prior, inputs, actions)
+model = create_model(action_model, prior, inputs, Int64.(actions), check_parameter_rejections = true)
 
-#Fit single chain with 10 iterations
-fitted_model = fit_model(model; n_iterations = 10, n_chains = 1)
+#Fit 
+posterior_chains = sample_posterior!(model, n_samples = 200, n_chains = 2)
 
 #-
 
 # ### Plot chains
-plot(fitted_model.chains)
-
-#-
-
-# ### Plot prior angainst posterior
-# plot_parameter_distribution(model, prior)
-#-
-# ### Get posterior
-# get_posteriors(model)
+plot(posterior_chains)
