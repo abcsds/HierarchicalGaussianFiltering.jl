@@ -56,24 +56,23 @@ hgf_parameters = Dict(
 )
 
 hgf = premade_hgf("binary_3level", hgf_parameters, verbose = false)
+action_model = ActionModel(HGFSoftmax(; HGF = hgf, action_noise = 0.2));
 
 # Create an agent
-agent_parameters = Dict("action_noise" => 0.2);
-agent = premade_agent("hgf_unit_square_sigmoid", hgf, agent_parameters, verbose = false);
+agent = init_agent(action_model, save_history = :xbin_prediction_mean);
 
 # Define a set of inputs
 inputs =
     [0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0];
 
 # Evolve agent and save actions
-actions = give_inputs!(agent, inputs)
+actions = simulate!(agent, inputs)
 
 
 # We can  by plotting the actions our agent has produced.
 using StatsPlots
-using Plots
-plot_trajectory(agent, ("u", "input_value"))
-plot_trajectory!(agent, ("xbin", "prediction"))
+plot(agent, "u")
+plot!(agent, :xbin_prediction_mean)
 
 
 
@@ -82,30 +81,22 @@ plot_trajectory!(agent, ("xbin", "prediction"))
 # We define a set of fixed parameters to use in this fitting process:
 
 # Set fixed parameters. We choose to fit the evolution rate of the xprob node. 
-fixed_parameters = Dict(
-    "action_noise" => 0.2,
-    ("xprob", "initial_mean") => 0,
-    ("xprob", "initial_precision") => 1,
-    ("xvol", "initial_mean") => 1,
-    ("xvol", "initial_precision") => 1,
-    ("xbin", "xprob", "coupling_strength") => 1.0,
-    ("xprob", "xvol", "coupling_strength") => 1.0,
-    ("xvol", "volatility") => -6.0,
-);
 
 # As you can read from the fixed parameters, the evolution rate of xprob is not configured. We set the prior for the xprob evolution rate:
-using Distributions
-param_priors = Dict(("xprob", "volatility") => Normal(-3.0, 0.5));
+prior = (; xprob_volatility = Normal(-3.0, 0.5))
 
 # We can fit the evolution rate by inputting the variables:
 
 # Create model
-model = create_model(agent, param_priors, inputs, actions)
+model = create_model(
+    action_model,
+    prior,
+    inputs,
+    Int64.(actions),
+    check_parameter_rejections = true,
+)
 
-#Fit single chain with 10 iterations
-fitted_model = fit_model(model; n_iterations = 10, n_chains = 1)
+# Now we can fit the model using the sample_posterior! function.
+posterior_chains = sample_posterior!(model, n_samples = 200, n_chains = 2)
 
-set_parameters!(agent, hgf_parameters)
-
-# ## Plotting Functions
-plot(fitted_model.chains)
+plot(posterior_chains)

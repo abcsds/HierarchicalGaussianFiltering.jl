@@ -174,80 +174,80 @@ end
 
 ### For getting all parameters ###
 
-function ActionModels.get_parameters(hgf::HGF)
+# function ActionModels.get_parameters(hgf::HGF)
 
-    #Initialize dict for parameters
-    parameters = Dict()
+#     #Initialize dict for parameters
+#     parameters = Dict()
 
-    #For each node
-    for node in hgf.ordered_nodes.all_nodes
-        #Get out the parameters of the node
-        node_parameters = get_parameters(node)
-        #And merge them with the dict
-        parameters = merge(parameters, node_parameters)
-    end
+#     #For each node
+#     for node in hgf.ordered_nodes.all_nodes
+#         #Get out the parameters of the node
+#         node_parameters = get_parameters(node)
+#         #And merge them with the dict
+#         parameters = merge(parameters, node_parameters)
+#     end
 
-    #If there are shared parameters
-    if length(hgf.parameter_groups) > 0
-        #Go through each shared parameter
-        for (parameter_group, grouped_parameters) in hgf.parameter_groups
-            #Remove grouped parameters from the list
-            filter!(x -> x[1] ∉ grouped_parameters.grouped_parameters, parameters)
-            #Add the parameter group parameter instead
-            parameters[parameter_group] = grouped_parameters.value
-        end
-    end
+#     #If there are shared parameters
+#     if length(hgf.parameter_groups) > 0
+#         #Go through each shared parameter
+#         for (parameter_group, grouped_parameters) in hgf.parameter_groups
+#             #Remove grouped parameters from the list
+#             filter!(x -> x[1] ∉ grouped_parameters.grouped_parameters, parameters)
+#             #Add the parameter group parameter instead
+#             parameters[parameter_group] = grouped_parameters.value
+#         end
+#     end
 
-    return parameters
-end
+#     return parameters
+# end
 
 
-function ActionModels.get_parameters(node::AbstractNode)
+# function ActionModels.get_parameters(node::AbstractNode)
 
-    #Initialize dictionary
-    parameters = Dict()
+#     #Initialize dictionary
+#     parameters = Dict()
 
-    #Go through all parameters in the node's parameters
-    for param_key in fieldnames(typeof(node.parameters))
+#     #Go through all parameters in the node's parameters
+#     for param_key in fieldnames(typeof(node.parameters))
 
-        #If the parameter is a coupling strength
-        if param_key == :coupling_strengths
+#         #If the parameter is a coupling strength
+#         if param_key == :coupling_strengths
 
-            #Get out the dict with coupling strengths
-            coupling_strengths = node.parameters.coupling_strengths
+#             #Get out the dict with coupling strengths
+#             coupling_strengths = node.parameters.coupling_strengths
 
-            #Go through each parent
-            for (parent_name, coupling_strength) in coupling_strengths
+#             #Go through each parent
+#             for (parent_name, coupling_strength) in coupling_strengths
 
-                #Add the coupling strength to the ouput dict
-                parameters[(node.name, parent_name, "coupling_strength")] =
-                    coupling_strength
+#                 #Add the coupling strength to the ouput dict
+#                 parameters[(node.name, parent_name, "coupling_strength")] =
+#                     coupling_strength
 
-            end
+#             end
 
-            #If the parameter is a coupling transform
-        elseif param_key == :coupling_transforms
+#             #If the parameter is a coupling transform
+#         elseif param_key == :coupling_transforms
 
-            #Go through each parent and corresponding transform
-            for (parent_name, coupling_transform) in node.parameters.coupling_transforms
+#             #Go through each parent and corresponding transform
+#             for (parent_name, coupling_transform) in node.parameters.coupling_transforms
 
-                #Go through each parameter for the transform
-                for (coupling_parameter, parameter_value) in coupling_transform.parameters
+#                 #Go through each parameter for the transform
+#                 for (coupling_parameter, parameter_value) in coupling_transform.parameters
 
-                    #Add the coupling strength to the ouput dict
-                    parameters[(node.name, parent_name, coupling_parameter)] =
-                        parameter_value
+#                     #Add the coupling strength to the ouput dict
+#                     parameters[(node.name, parent_name, coupling_parameter)] =
+#                         parameter_value
 
-                end
-            end
+#                 end
+#             end
 
-            #For other nodes
-        else
-            #And add their values to the dictionary
-            parameters[(node.name, String(param_key))] =
-                getproperty(node.parameters, param_key)
-        end
-    end
+#             #For other nodes
+#         else
+#             #And add their values to the dictionary
+#             parameters[(node.name, String(param_key))] =
+#                 getproperty(node.parameters, param_key)
+#         end
+#     end
 
-    return parameters
-end
+#     return parameters
+# end

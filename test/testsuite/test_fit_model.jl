@@ -1,122 +1,229 @@
-using ActionModels
-using HierarchicalGaussianFiltering
 using Test
+
+using HierarchicalGaussianFiltering
+using ActionModels
+using ActionModels: DataFrames
+
 using StatsPlots
-using Distributions
-using ActionModels: Turing
 
 @testset "Model fitting" begin
 
-    @testset "Continuous 2level" begin
+    data = DataFrames.DataFrame(
+        observations = repeat([1.0, 1, 1, 2, 2, 2], 6),
+        actions = vcat(
+            [0, 0.2, 0.3, 0.4, 0.5, 0.6],
+            [0, 0.5, 0.8, 1, 1.5, 1.8],
+            [0, 2, 0.5, 4, 5, 3],
+            [0, 0.1, 0.15, 0.2, 0.25, 0.3],
+            [0, 0.2, 0.4, 0.7, 1.0, 1.1],
+            [0, 2, 0.5, 4, 5, 3],
+        ),
+        age = vcat(
+            repeat([20], 6),
+            repeat([24], 6),
+            repeat([28], 6),
+            repeat([20], 6),
+            repeat([24], 6),
+            repeat([28], 6),
+        ),
+        id = vcat(
+            repeat(["Hans"], 6),
+            repeat(["Georg"], 6),
+            repeat(["Jørgen"], 6),
+            repeat(["Hans"], 6),
+            repeat(["Georg"], 6),
+            repeat(["Jørgen"], 6),
+        ),
+        treatment = vcat(repeat(["control"], 18), repeat(["treatment"], 18)),
+    )
 
-        #Set inputs and responses
-        test_input = [1.0, 1.0, 1.0, 1.0, 1.0]
-        test_responses = [1.0, 1.0, 1.0, 1.0, 1.0]
+    #Add a second set of actions and observations
+    data.actions_2 = data.actions
+    data.observations_2 = data.observations
+
+    #Add multivariate actions
+    data.actions_mv = Vector.(eachrow([data.actions data.actions_2]))
+
+    #Define observation and action cols
+    observation_cols = [:observations]
+    action_cols = [:actions]
+    session_cols = [:id, :treatment]
+
+
+
+    #Inference parameters
+    n_samples = 200
+    n_chains = 2
+
+    ad_type = AutoForwardDiff()
+
+    @testset "test full inference procedure" begin
 
         #Create HGF
-        test_hgf = premade_hgf("continuous_2level", verbose = false)
+        hgf = premade_hgf("continuous_2level", verbose = false)
 
-        #Create agent
-        test_agent = premade_agent("hgf_gaussian", test_hgf, verbose = false)
+        #Create action model
+        action_model = ActionModel(HGFGaussian(; HGF = hgf))
 
-        # Set fixed parsmeters and priors for fitting
-        test_fixed_parameters = Dict(
-            ("x", "initial_mean") => 1,
-            ("xvol", "initial_mean") => 1.0,
-            ("xvol", "initial_precision") => 1,
-            ("x", "xvol", "coupling_strength") => 1.0,
-            "action_noise" => 0.01,
-            ("xvol", "volatility") => -10,
-            ("u", "input_noise") => 4,
-            ("xvol", "drift") => 1,
-        )
-
-        test_param_priors = Dict(
-            ("x", "volatility") => Normal(-10, 0.1),
-        )
+        #Set priors
+        prior = (action_noise = LogNormal(), x_volatility = Normal(-6, 3))
 
         #Create model
-        model = create_model(test_agent, test_param_priors, test_input, test_responses;)
+        model = create_model(
+            action_model,
+            prior,
+            data,
+            observation_cols = observation_cols,
+            action_cols = action_cols,
+            session_cols = session_cols,
+        )
 
-        #Fit single chain with defaults
-        fitted_model = fit_model(model; n_iterations = 10, n_chains = 1)
+        #Sample Posterior
+        posterior_chains = sample_posterior!(
+            model,
+            ad_type = ad_type,
+            n_samples = n_samples,
+            n_chains = n_chains,
+        )
 
-        chains = fitted_model.chains
-        renamed_model = rename_chains(chains, model)
-        #Extract agent parameters
-        agent_parameters = extract_quantities(model, chains)
+        plot(posterior_chains)
 
-        estimates_df = get_estimates(agent_parameters)
-        estimates_dict = get_estimates(agent_parameters, Dict)
+        posterior_parameters = get_session_parameters!(model, :posterior)
+        posterior_parameters_df = summarize(posterior_parameters)
 
-        #Extract state trajectories
-        state_trajectories = get_trajectories(model, chains, [("x", "value_prediction_error"), "action"])
-        trajectory_estimates_df = get_estimates(state_trajectories)
+        posterior_trajectories =
+            get_state_trajectories!(model, [:x_value_prediction_error], :posterior)
+        posterior_trajectories_df = summarize(posterior_trajectories)
 
-        @test fitted_model isa ActionModels.FitModelResults
+        prior_chains = sample_prior!(model, n_samples = n_samples, n_chains = n_chains)
+        plot(prior_chains)
+        prior_parameters = get_session_parameters!(model, :prior)
+        summarize(prior_parameters)
+        prior_trajectories =
+            get_state_trajectories!(model, [:x_value_prediction_error], :prior)
+        summarize(prior_trajectories)
+    end
 
-        #Plot the parameter distribution
-        # plot_parameter_distribution(fitted_model, test_param_priors)
+    @testset "Continuous 2level Gaussian" begin
 
-        # Posterior predictive plot
-        # plot_predictive_simulation(
-        #     fitted_model,
-        #     test_agent,
-        #     test_input,
-        #     ("x", "posterior_mean");
-        #     verbose = false,
-        #     n_simulations = 3,
-        # )
+        #Define inputs and responses
+        observations = [1.0, 1.0, 1.0, 1.0, 1.0]
+        actions = [1.0, 1.0, 1.0, 1.0, 1.0]
+
+        #Create HGF
+        hgf = premade_hgf("continuous_2level", verbose = false)
+
+        #Create action model
+        action_model = ActionModel(HGFGaussian(; HGF = hgf))
+
+        #Set priors
+        prior = (action_noise = LogNormal(), x_volatility = Normal(-6, 3))
+
+        #Create model
+        model = create_model(action_model, prior, observations, actions;)
+
+        #Sample Posterior
+        posterior_chains = sample_posterior!(
+            model,
+            ad_type = ad_type,
+            n_samples = n_samples,
+            n_chains = n_chains,
+        )
     end
 
 
-    @testset "Canonical Binary 3level" begin
+    @testset "Binary 3level Sigmoid" begin
 
         #Set inputs and responses 
         test_input = [1, 0, 0, 1, 1]
         test_responses = [1, 0, 1, 1, 0]
 
         #Create HGF
-        test_hgf = premade_hgf("binary_3level", verbose = false)
+        hgf = premade_hgf("binary_3level", verbose = false)
 
-        #Create agent 
-        test_agent = premade_agent("hgf_binary_softmax", test_hgf, verbose = false)
+        action_model = ActionModel(HGFSigmoid(; HGF = hgf))
 
-        #Set fixed parameters and priors
-        test_fixed_parameters = Dict(
-            ("xprob", "initial_mean") => 3.0,
-            ("xprob", "initial_precision") => exp(2.306),
-            ("xvol", "initial_mean") => 3.2189,
-            ("xvol", "initial_precision") => exp(-1.0986),
-            ("xbin", "xprob", "coupling_strength") => 1.0,
-            ("xprob", "xvol", "coupling_strength") => 1.0,
-            ("xvol", "volatility") => -3,
+        prior = (
+            action_noise = LogNormal(),
+            xprob_volatility = truncated(Normal(-6, 1), upper = -3),
         )
 
-        test_param_priors = Dict(
-            "action_noise" => truncated(Normal(0.01, 20), 0, Inf),
-            ("xprob", "volatility") => Normal(-7, 5),
+        model = create_model(
+            action_model,
+            prior,
+            test_input,
+            test_responses;
+            check_parameter_rejections = true,
         )
 
-        #Create model
-        model = create_model(test_agent, test_param_priors, test_input, test_responses;)
+        posterior_chains = sample_posterior!(
+            model,
+            ad_type = ad_type,
+            n_samples = n_samples,
+            n_chains = n_chains,
+        )
+    end
 
-        #Fit single chain with defaults
-        fitted_model = fit_model(model; n_iterations = 10, n_chains = 1)
+    @testset "Binary 3level Softmax" begin
 
-        @test fitted_model isa ActionModels.FitModelResults
+        #Set inputs and responses 
+        test_input = [1, 0, 0, 1, 1]
+        test_responses = [1, 0, 1, 1, 0]
 
-        #Plot the parameter distribution
-        # plot_parameter_distribution(fitted_model, test_param_priors)
+        #Create HGF
+        hgf = premade_hgf("binary_3level", verbose = false)
 
-        # Posterior predictive plot
-        # plot_predictive_simulation(
-        #     fitted_model,
-        #     test_agent,
-        #     test_input,
-        #     ("xbin", "posterior_mean"),
-        #     verbose = false,
-        #     n_simulations = 3,
-        # )
+        action_model = ActionModel(HGFSoftmax(; HGF = hgf))
+
+        prior = (
+            action_noise = LogNormal(),
+            xprob_volatility = truncated(Normal(-9, 1), upper = -3),
+        )
+
+        model = create_model(
+            action_model,
+            prior,
+            test_input,
+            test_responses;
+            check_parameter_rejections = true,
+        )
+
+        posterior_chains = sample_posterior!(
+            model,
+            ad_type = ad_type,
+            n_samples = n_samples,
+            n_chains = n_chains,
+        )
+    end
+
+    @testset "Categorical 3level Predict" begin
+
+        #Set inputs and responses 
+        test_input = [1, 1, 2, 3, 3]
+        test_responses = [1, 1, 2, 3, 1]
+
+        #Create HGF
+        hgf = premade_hgf("categorical_3level", verbose = false)
+        action_model = ActionModel(HGFPredictCategory(; HGF = hgf))
+
+        prior = (
+            action_noise = LogNormal(),
+            xprob_volatility = truncated(Normal(-9, 1), upper = -3),
+        )
+
+        model = create_model(
+            action_model,
+            prior,
+            test_input,
+            test_responses;
+            check_parameter_rejections = true,
+        )
+
+        posterior_chains = sample_posterior!(
+            model,
+            ad_type = ad_type,
+            n_samples = n_samples,
+            n_chains = n_chains,
+        )
     end
 end

@@ -33,6 +33,23 @@ abstract type HGFUpdateType end
 struct ClassicUpdate <: HGFUpdateType end
 struct EnhancedUpdate <: HGFUpdateType end
 
+
+###############################################
+######## Types for grouping parameters ########
+###############################################
+#API type for specifying parameter groups
+Base.@kwdef mutable struct ParameterGroup
+    name::String
+    parameters::Vector
+    value::Real
+end
+
+#Internal type for storing grouped parameters
+Base.@kwdef mutable struct GroupedParameters
+    value::Real
+    grouped_parameters::Vector
+end
+
 ################################
 ######## Coupling types ########
 ################################
@@ -90,12 +107,14 @@ end
 
 """
 """
-Base.@kwdef mutable struct HGF
+Base.@kwdef mutable struct HGF <: ActionModels.AbstractSubmodelAttributes
     all_nodes::Dict{String,AbstractNode}
     input_nodes::Dict{String,AbstractInputNode}
     state_nodes::Dict{String,AbstractStateNode}
     ordered_nodes::OrderedNodes = OrderedNodes()
     parameter_groups::Dict = Dict()
+    parameter_interface::Dict{Symbol,Union{String,Tuple}} = Dict{Symbol,Tuple}()
+    state_interface::Dict{Symbol,Union{String,Tuple}} = Dict{Symbol,Tuple}()
     save_history::Bool = true
     timesteps::Vector{Real} = [0]
 end

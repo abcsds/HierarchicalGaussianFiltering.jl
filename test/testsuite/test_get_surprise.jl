@@ -19,7 +19,7 @@ using HierarchicalGaussianFiltering
         HGF_test = premade_hgf("categorical_state_transitions", verbose = false)
 
         #Give inputs
-        give_inputs!(HGF_test, test_inputs)
+        multiple_inputs!(HGF_test, test_inputs)
 
         #Get surprise
         @test get_surprise(HGF_test) isa Real

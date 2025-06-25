@@ -1,6 +1,5 @@
 using Test
 using HierarchicalGaussianFiltering
-using Distributions
 
 @testset "Testing nonlinear transforms" begin
 
@@ -39,17 +38,14 @@ using Distributions
 
         set_parameters!(
             hgf,
-            Dict(
-                ("u", "input_noise") => 4,
-                ("x1", "autoconnection_strength") => 0
-            ),
+            Dict(("u", "input_noise") => 4, ("x1", "autoconnection_strength") => 0),
         )
 
-        inputs = sin.(collect(0:1/20:1000/20))
+        inputs = sin.(collect(0:(1/20):(1000/20)))
 
         #Add gaussian noise
         inputs = rand(Normal(0, 0.5), length(inputs)) + inputs
 
-        give_inputs!(hgf, inputs)
+        multiple_inputs!(hgf, inputs)
     end
 end

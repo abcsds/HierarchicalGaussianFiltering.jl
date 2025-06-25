@@ -2,7 +2,7 @@ using HierarchicalGaussianFiltering
 using Test
 using CSV
 using DataFrames
-using Plots
+using StatsPlots
 
 @testset "Canonical Tests" begin
 
@@ -51,7 +51,7 @@ using Plots
         test_hgf = premade_hgf("continuous_2level", parameters, verbose = false)
 
         #Give inputs
-        give_inputs!(test_hgf, input_trajectory)
+        multiple_inputs!(test_hgf, input_trajectory)
 
         #Construct result output dataframe
         result_outputs = DataFrame(
@@ -73,8 +73,8 @@ using Plots
 
         @testset "Trajectory plots" begin
             #Make trajectory plots
-            plot_trajectory(test_hgf, "u")
-            plot_trajectory!(test_hgf, ("x", "posterior"))
+            plot(test_hgf, "u")
+            plot!(test_hgf, "x", "posterior")
         end
     end
 
@@ -107,7 +107,7 @@ using Plots
         test_hgf = premade_hgf("binary_3level", test_parameters, verbose = false)
 
         #Give inputs (mu1's are equal to the inputs in a binary HGF without sensory noise)
-        give_inputs!(test_hgf, canonical_trajectory.mu1)
+        multiple_inputs!(test_hgf, Vector(canonical_trajectory.mu1))
 
         #Construct result output dataframe
         result_outputs = DataFrame(
@@ -152,8 +152,8 @@ using Plots
 
         @testset "Trajectory plots" begin
             #Make trajectory plots
-            plot_trajectory(test_hgf, "u")
-            plot_trajectory!(test_hgf, ("xbin", "prediction"))
+            plot(test_hgf, "u")
+            plot!(test_hgf, "xbin", "prediction")
         end
     end
 end

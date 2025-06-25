@@ -49,11 +49,11 @@
 
 # Getting a list of premade HGF agents
 using HierarchicalGaussianFiltering
-
-premade_agent("help")
+using ActionModels
 
 # Define an agent with default parameter values and default HGF 
-agent = premade_agent("hgf_binary_softmax")
+action_model = ActionModel(HGFSoftmax(; HGF = "binary_3level"))
+agent = init_agent(action_model, save_history = :xbin_prediction_mean)
 
 # ## Utility functions for accessing parameters and states
 
@@ -61,22 +61,19 @@ agent = premade_agent("hgf_binary_softmax")
 get_parameters(agent)
 
 # Get specific parameter in agent:
-get_parameters(agent, ("xvol", "initial_precision"))
+get_parameters(agent, :xvol_initial_precision)
 
 # Get all states in an agent:
 get_states(agent)
 
 # Get specific state in an agent:
-get_states(agent, ("xbin", "posterior_precision"))
+get_states(agent, :xbin_posterior_precision)
 
 # Set a parameter value
-set_parameters!(agent, ("xvol", "initial_precision"), 0.4)
+set_parameters!(agent, :xvol_initial_precision, 0.4)
 
 # Set multiple parameter values
-set_parameters!(
-    agent,
-    Dict(("xvol", "initial_precision") => 1, ("xvol", "volatility") => 0),
-)
+set_parameters!(agent, (xvol_initial_precision = 1, xvol_volatility = 0))
 
 
 # Let us move on to giving a set of inputs to the agent. 
@@ -85,18 +82,16 @@ set_parameters!(
 input = [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0]
 
 # Give inputs and generate actions
-actions = give_inputs!(agent, input)
+actions = simulate!(agent, input)
 
 # Get the history of a single state in the agent
-get_history(agent, ("xbin", "prediction_mean"))
+get_history(agent, :xbin_prediction_mean)
 
 # We can plot the input and prediciton means with plot trajectory. Notice, when using plot_trajectory!() you can layer plots. 
 
 using StatsPlots
-using Plots
 
-plot_trajectory(agent, ("u", "input_value"))
+plot(agent, ("u", "input_value"))
 
 # Let's add prediction mean on top of the plot
-plot_trajectory!(agent, ("xbin", "prediction_mean"))
-
+plot!(agent, ("xbin", "prediction_mean"))

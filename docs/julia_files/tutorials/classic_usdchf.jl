@@ -5,9 +5,7 @@
 # First load packages
 using ActionModels
 using HierarchicalGaussianFiltering
-using Plots
 using StatsPlots
-using Distributions
 
 # Get the path for the HGF superfolder
 hgf_path = dirname(dirname(pathof(HierarchicalGaussianFiltering)))
@@ -24,29 +22,31 @@ end
 
 #Create HGF
 hgf = premade_hgf("continuous_2level", verbose = false);
-agent = premade_agent("hgf_gaussian", hgf, verbose = false);
+
+action_model = ActionModel(HGFGaussian(; HGF = hgf))
+agent = init_agent(action_model)
 
 # Set parameters for parameter recover
-parameters = Dict(
-    ("x", "xvol", "coupling_strength") => 1.0,
-    ("u", "input_noise") => -log(1e4),
-    ("x", "volatility") => -13,
-    ("xvol", "volatility") => -2,
-    ("x", "initial_mean") => 1.04,
-    ("x", "initial_precision") => 1 / (0.0001),
-    ("xvol", "initial_mean") => 1.0,
-    ("xvol", "initial_precision") => 1 / 0.1,
-    "action_noise" => 0.01,
+parameters = (
+    x_xvol_coupling_strength = 1.0,
+    u_input_noise = -log(1e4),
+    x_volatility = -13,
+    xvol_volatility = -2,
+    x_initial_mean = 1.04,
+    x_initial_precision = 1 / (0.0001),
+    xvol_initial_mean = 1.0,
+    xvol_initial_precision = 1 / 0.1,
+    action_noise = 0.01,
 );
 
 set_parameters!(agent, parameters)
 reset!(agent)
 
 # Evolve agent
-actions = give_inputs!(agent, inputs);
+actions = simulate!(agent, inputs);
 
 # Plot trajectories
-plot_trajectory(
+plot(
     agent,
     "u",
     size = (1300, 500),
@@ -58,17 +58,10 @@ plot_trajectory(
     xlabel = "Trading days since 1 January 2010",
 )
 #-
-plot_trajectory!(agent, ("x", "posterior"), color = "red")
-plot_trajectory!(
-    agent,
-    "action",
-    size = (1300, 500),
-    xlims = (0, 614),
-    markersize = 3,
-    markercolor = "orange",
-)
+plot!(agent, ("x", "posterior"), color = "red")
+plot!(actions, size = (1300, 500), xlims = (0, 614), markersize = 3, markercolor = "orange")
 #-
-plot_trajectory(
+plot(
     agent,
     "xvol",
     color = "blue",
@@ -79,39 +72,20 @@ plot_trajectory(
 )
 #-
 # Set priors for fitting
-fixed_parameters = Dict(
-    ("x", "xvol", "coupling_strength") => 1.0,
-    ("x", "initial_mean") => 0,
-    ("x", "initial_precision") => 2000,
-    ("xvol", "initial_mean") => 1.0,
-    ("xvol", "initial_precision") => 600.0,
+priors = (
+    u_input_noise = Normal(-6, 1),
+    x_volatility = Normal(-4, 1),
+    xvol_volatility = Normal(-4, 1),
+    action_noise = LogNormal(log(0.01), 1),
 );
 
-param_priors = Dict(
-    ("u", "input_noise") => Normal(-6, 1),
-    ("x", "volatility") => Normal(-4, 1),
-    ("xvol", "volatility") => Normal(-4, 1),
-    "action_noise" => LogNormal(log(0.01), 1),
-);
-#-
-# # Prior predictive simulation plot
-# plot_predictive_simulation(
-#     param_priors,
-#     agent,
-#     inputs,
-#     ("x", "posterior_mean");
-#     n_simulations = 100,
-# )
-#-
 # Do parameter recovery
-model = create_model(agent, param_priors, inputs, actions)
+model =
+    create_model(action_model, priors, inputs, actions, check_parameter_rejections = true)
 
-#Fit single chain with 10 iterations
-fitted_model = fit_model(model; n_iterations = 10, n_chains = 1)
+#Fit 
+posterior_chains = sample_posterior!(model, n_samples = 200, n_chains = 2)
+
 #-
 # Plot the chains
-plot(fitted_model.chains)
-#-
-# Plot prior posterior distributions
-# plot_parameter_distribution(fitted_model, param_priors)
-#-
+plot(posterior_chains)

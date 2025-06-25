@@ -1,26 +1,7 @@
-"""
-give_inputs!(hgf::HGF, inputs)
-
-Give inputs to an agent. Input can be a single value, a vector of values, or an array of values.
-"""
-# function ActionModels.give_inputs!() end
-
-
-### Giving a single input ###
-function ActionModels.give_inputs!(hgf::HGF, inputs::Real; stepsizes::Real = 1)
-
-    #Input the value to the hgf
-    update_hgf!(hgf, inputs, stepsize = stepsizes)
-
-    return nothing
-end
+#### FUNCTIONS FOR GIVING MULTIPLE INPUTS IN A ROW TO AN HGF ####
 
 ### Giving a vector of inputs ###
-function ActionModels.give_inputs!(
-    hgf::HGF,
-    inputs::Vector;
-    stepsizes::Union{Real,Vector} = 1,
-)
+function multiple_inputs!(hgf::HGF, inputs::Vector; stepsizes::Union{Real,Vector} = 1)
 
     #Create vector of stepsizes
     if stepsizes isa Real
@@ -43,11 +24,7 @@ end
 
 
 ### Giving a matrix of inputs (multiple per timestep) ###
-function ActionModels.give_inputs!(
-    hgf::HGF,
-    inputs::Array;
-    stepsizes::Union{Real,Vector} = 1,
-)
+function multiple_inputs!(hgf::HGF, inputs::Array; stepsizes::Union{Real,Vector} = 1)
 
     #If number of column in input is diffferent from amount of input nodes
     if size(inputs, 2) != length(hgf.input_nodes)
